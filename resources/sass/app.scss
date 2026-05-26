@@ -1,4 +1,10 @@
-// ========================
+// // ========================
+// // 🌌 GLOBAL BODY
+// // ========================// Local mixins and variables
+@use "./mixins" as mixin; 
+@use "./variables" as *; 
+
+// Third-party libraries ========================
 // ⬆️ IMPORTS
 // ========================@use "bootstrap" as *;
 @use "@fortawesome/fontawesome-free/css/all.min.css" as *;
@@ -6,4 +12,31 @@
 
 .container{
     background: #000;
+}
+.btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    border-radius: 5px;
+}
+a {
+    text-decoration: none;
+}
+img {
+    width: 100%;
+}
+* {
+    box-sizing: border-box;
+}
+html {
+    overflow-x: hidden !important;
+}
+body {
+    margin: 0 !important;
+    overflow-x: hidden !important;
+}
+
+.form-control {
+    box-shadow: none !important;
 }

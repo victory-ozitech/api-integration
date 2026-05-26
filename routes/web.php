@@ -11,4 +11,5 @@ Route::middleware([HandleInertiaRequests::class])->group(function () {
 
 Route::controller(DashBoardController::class)->group(function () {
     Route::get('/dashboard', 'index')->name('dashboard');
+    Route::get('/create', 'create')->name('create');
 });
