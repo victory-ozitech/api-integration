@@ -12,8 +12,5 @@ Route::middleware([HandleInertiaRequests::class])->group(function () {
 
 Route::controller(DashBoardController::class)->group(function () {
     Route::get('/dashboard', 'index')->name('dashboard');
-});
-
-Route::controller(FacebookController::class)->group(function () {
-    Route::get('/facebook', 'redirectToFacebook')->name('redirect-to-facebook');
+    Route::get('/create', 'create')->name('create');
 });
