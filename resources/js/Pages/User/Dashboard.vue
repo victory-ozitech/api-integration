@@ -79,7 +79,7 @@
                                 </div>
                                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                                     <Link :href="route(
-                                        'create'
+                                        'posts.create'
                                     )
                                         " class="each-option">
                                     <div class="img-bg">

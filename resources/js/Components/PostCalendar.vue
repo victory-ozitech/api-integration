@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from "vue";
 
 //Views
@@ -21,7 +21,16 @@ const views = {
     day: DayView,
 };
 
+// Computed
 const currentView = computed(() => views[view.value]);
+
+const currentLabel = computed(() => {
+    const d = currentDate.value;
+
+    if (view.value === "month") return formatMonth(d);
+    if (view.value === "week") return formatWeek(d);
+    return formatDay(d);
+});
 
 // Navigation
 const next = () => {
@@ -43,32 +52,179 @@ const prev = () => {
 
     currentDate.value = d;
 };
+
+// Formatting
+const formatMonth = (date) =>
+    date.toLocaleString("default", { month: "long", year: "numeric" });
+
+const formatDay = (date) =>
+    date.toLocaleString("default", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+    });
+
+const formatWeek = (date) => {
+    const start = new Date(date);
+    start.setDate(start.getDate() - start.getDay());
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+
+    const startStr = start.toLocaleString("default", {
+        month: "short",
+        day: "numeric",
+    });
+
+    const endStr = end.toLocaleString("default", {
+        month: "short",
+        day: "numeric",
+    });
+
+    return `${startStr} - ${endStr}`;
+};
 </script>
 
 <template>
-    <div>
+    <div class="calendar-shell">
+        <div class="calendar-header mb-3">
+            <div class="calendar-controls">
+                <div class="navigation-group">
+                    <button type="button" class="nav-btn" @click="prev">←</button>
+                    <button type="button" class="nav-btn" @click="next">→</button>
+                    <button type="button" class="today-btn" @click="currentDate = new Date()">Today</button>
+                </div>
 
-        <!-- Controls -->
-        <div class="d-flex justify-content-between mb-3">
-            <div>
-                <button class="btn btn-sm btn-outline-dark me-2" @click="prev">←</button>
-                <button class="btn btn-sm btn-outline-dark" @click="next">→</button>
-            </div>
+                <div class="calendar-title">
+                    <h4>{{ currentLabel }}</h4>
+                </div>
 
-            <div>
-                <button @click="view = 'month'" class="btn btn-sm"
-                    :class="view === 'month' ? 'btn-dark' : 'btn-outline-dark'">Month</button>
-
-                <button @click="view = 'week'" class="btn btn-sm"
-                    :class="view === 'week' ? 'btn-dark' : 'btn-outline-dark'">Week</button>
-
-                <button @click="view = 'day'" class="btn btn-sm"
-                    :class="view === 'day' ? 'btn-dark' : 'btn-outline-dark'">Day</button>
+                <div class="view-switcher">
+                    <button type="button" @click="view = 'month'" class="view-btn"
+                        :class="{ 'view-btn--active': view === 'month' }">
+                        Month
+                    </button>
+                    <button type="button" @click="view = 'week'" class="view-btn"
+                        :class="{ 'view-btn--active': view === 'week' }">
+                        Week
+                    </button>
+                    <button type="button" @click="view = 'day'" class="view-btn"
+                        :class="{ 'view-btn--active': view === 'day' }">
+                        Day
+                    </button>
+                </div>
             </div>
         </div>
 
-      <!-- Views -->
-        <component :is="currentView" :posts="posts" :currentDate="currentDate" />
-
+        <transition name="calendar-fade" mode="out-in">
+            <component :is="currentView" :posts="posts" :currentDate="currentDate" :key="view" />
+        </transition>
     </div>
 </template>
+
+<style>
+.calendar-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.calendar-header {
+    padding: 18px 20px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.calendar-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.navigation-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-btn,
+.today-btn,
+.view-btn {
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: #f8fafc;
+    color: #0f172a;
+    border-radius: 14px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.nav-btn {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    padding: 0;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn:hover,
+.today-btn:hover,
+.view-btn:hover {
+    transform: translateY(-1px);
+    background: #eef2ff;
+    border-color: rgba(99, 102, 241, 0.25);
+}
+
+.today-btn {
+    color: #334155;
+}
+
+.view-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(99, 102, 241, 0.08);
+    border-radius: 999px;
+    padding: 6px;
+}
+
+.view-btn {
+    background: transparent;
+    border: none;
+    color: #475569;
+    min-width: 72px;
+    border-radius: 999px;
+}
+
+.view-btn--active {
+    background: #6366f1;
+    color: white;
+    box-shadow: 0 10px 24px rgba(99, 102, 241, 0.18);
+}
+
+.calendar-title h4 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.calendar-fade-enter-active,
+.calendar-fade-leave-active {
+    transition: opacity 0.24s ease;
+}
+
+.calendar-fade-enter-from,
+.calendar-fade-leave-to {
+    opacity: 0;
+}
+</style>
