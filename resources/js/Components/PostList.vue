@@ -1,7 +1,7 @@
 <script setup>
 import PostCard from "./PostCard.vue";
 
-defineProps({
+const props = defineProps({
     posts: Array
 });
 
@@ -14,7 +14,7 @@ const handleRefresh = () => {
 
 <template>
     <div class="row">
-        <div class="col-md-6 col-lg-4 mb-4" v-for="post in posts" :key="post.id">
+        <div class="col-md-6 col-lg-4 mb-4" v-for="post in props.posts" :key="post.id">
             <PostCard :post="post" @refresh="handleRefresh" />
         </div>
     </div>
