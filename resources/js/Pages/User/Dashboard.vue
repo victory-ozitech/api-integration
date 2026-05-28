@@ -10,7 +10,7 @@
                         <span class="large-txt">Hello <span>{{ formattedUsername }}, </span></span><span
                             class="small-txt">Welcome To Your Workspace</span>
                     </div>
-                    <Link :href="route('create')" class="img-cont">
+                    <Link :href="route('posts.create')" class="img-cont">
                     <!-- <img src="https://fastly.picsum.photos/id/108/200/300.jpg?hmac=66ukSMLRNm61ayt092vMAdSgvIRE5opr1Dj3kxCkC2c"
                         alt="" /> -->
                     <img :src="'/assets/images/arkive-logo.png'" alt="" />
@@ -30,7 +30,7 @@
                                 </div>
                             </div>
                         </div>
-                        <Link :href="route('create')" class="add-channel">
+                        <Link :href="route('posts.create')" class="add-channel">
                         <div class="icon-cont">
                             <i class="fa-solid fa-plus"></i>
                         </div>
@@ -42,7 +42,7 @@
                         <div class="options">
                             <div class="row g-3">
                                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
-                                    <Link :href="route('create')
+                                    <Link :href="route('posts.create')
                                         " class="each-option">
                                     <div class="img-bg">
                                         <div class="img-cont">
@@ -60,7 +60,7 @@
                                     </Link>
                                 </div>
                                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
-                                    <Link :href="route('create')
+                                    <Link :href="route('posts.create')
                                         " class="each-option">
                                     <div class="img-bg">
                                         <div class="img-cont">
@@ -99,7 +99,7 @@
                                     </Link>
                                 </div>
                                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
-                                    <Link :href="route('create')" class="each-option">
+                                    <Link :href="route('posts.create')" class="each-option">
                                     <div class="img-bg">
                                         <div class="img-cont">
                                             <img :src="'/assets/images/upload-files-img.png'" alt="" />

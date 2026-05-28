@@ -12,6 +12,8 @@ class FacebookAccount extends Model
         'name',
         'email',
         'avatar',
+        'access_token',
+        'expires_in',
     ];
 
     public function user()
