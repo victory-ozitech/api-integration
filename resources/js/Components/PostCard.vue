@@ -6,9 +6,9 @@ const props = defineProps({
     post: Object
 });
 
-onMounted(() => {
-    console.log("Loaded post:", props.post);
-});
+// onMounted(() => {
+//     console.log("Loaded post:", props.post);
+// });
 
 const emit = defineEmits(["refresh"]);
 

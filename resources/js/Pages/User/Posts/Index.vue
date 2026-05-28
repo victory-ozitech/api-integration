@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { router } from "@inertiajs/vue3";
 import PostList from "@components/PostList.vue";
 import PostCalendar from "@components/PostCalendar.vue";
 import ViewToggle from "@components/ViewToggle.vue";
@@ -17,7 +18,7 @@ onMounted(() => {
 const filteredPosts = computed(() => posts.value);
 
 const loadPosts = () => {
-    posts.value = getPosts();
+    router.get(route("posts.index"));
 };
 </script>
 
