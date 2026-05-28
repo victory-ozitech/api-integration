@@ -10,6 +10,10 @@ use Inertia\Inertia;
 
 class FacebookController extends Controller
 {
+    public function connect()
+    {
+        return Inertia::render('User/Facebook/SelectPage');
+    }
     public function redirectToFacebook()
     {
         

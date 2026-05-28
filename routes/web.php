@@ -16,3 +16,9 @@ Route::controller(DashBoardController::class)->group(function () {
     Route::get('/create', 'create')->name('posts.create');
     Route::get('/{id}/edit', 'edit')->name('posts.edit');
 });
+
+Route::controller(FacebookController::class)->group(function () {
+    Route::get('/connect-facebook', 'connect')->name('facebook.connect');
+    Route::get('/auth/facebook', 'redirectToFacebook')->name('facebook.redirect');
+    Route::get('/auth/facebook/callback', 'handleFacebookCallback')->name('facebook.callback');
+});

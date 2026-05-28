@@ -1,14 +1,11 @@
+
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
     "content-hash": "b3a00b4726930a769ba744b2d8443f51",
-=======
-    "content-hash": "9443091cfd6ef291e80e1e068b90559e",
->>>>>>> 3d1ebfa1a1fe64abd01971e520d02745c796fb75
     "packages": [
         {
             "name": "brick/math",

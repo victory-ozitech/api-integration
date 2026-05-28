@@ -17,7 +17,9 @@ return new class extends Migration
             $table->string('facebook_id')->unique();
             $table->string('name');
             $table->string('email')->nullable();
-            $table->string('avatar')->nullable();
+            $table->text('avatar')->nullable();
+            $table->text('access_token');
+            $table->timestamp('expires_in')->nullable();
             $table->timestamps();
         });
     }

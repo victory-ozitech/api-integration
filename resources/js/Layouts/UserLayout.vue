@@ -27,10 +27,10 @@
                 </li>
 
                 <li :class="{
-                    active: isActiveRoute('posts.create'),
+                    active: isActiveRoute('facebook.connect'),
                 }">
                     <SvgIcon name="channels" @click="toggleExpand" />
-                    <Link :href="route('posts.create')">
+                    <Link :href="route('facebook.connect')">
                     <span v-show="isExpanded">Channels</span>
                     </Link>
                 </li>
@@ -73,7 +73,7 @@
                     <div id="media-screen-search" @click="toggleSearch">
                         <i class="fa fa-search"></i>
                     </div>
-                    <Link :href="route('posts.create')" class="header-action" title="Channels">
+                    <Link :href="route('facebook.connect')" class="header-action" title="Channels">
                     <SvgIcon name="channels"></SvgIcon>
                     </Link>
                     <Link :href="route('posts.create')" class="header-action" title="Create Post">
