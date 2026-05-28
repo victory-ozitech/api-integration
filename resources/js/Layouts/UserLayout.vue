@@ -18,27 +18,37 @@
             </div>
             <ul>
                 <li :class="{
-                    active: isActiveRoute('create'),
+                    active: isActiveRoute('dashboard'),
                 }">
                     <SvgIcon name="dashboard" @click="toggleExpand" />
-                    <Link :href="route('create')">
+                    <Link :href="route('dashboard')">
                     <span v-show="isExpanded"> Dashboard </span>
                     </Link>
                 </li>
+
                 <li :class="{
-                    active: isActiveRoute('create'),
+                    active: isActiveRoute('posts.create'),
                 }">
                     <SvgIcon name="channels" @click="toggleExpand" />
-                    <Link :href="route('create')">
+                    <Link :href="route('posts.create')">
                     <span v-show="isExpanded">Channels</span>
                     </Link>
                 </li>
 
                 <li :class="{
-                    active: isActiveRoute('create'),
+                    active: isActiveRoute('posts.index'),
+                }">
+                    <SvgIcon name="calendar" @click="toggleExpand" />
+                    <Link :href="route('posts.index')">
+                    <span v-show="isExpanded">Calendar</span>
+                    </Link>
+                </li>
+
+                <li :class="{
+                    active: isActiveRoute('posts.create'),
                 }">
                     <SvgIcon name="create" @click="toggleExpand" />
-                    <Link :href="route('create')">
+                    <Link :href="route('posts.create')">
                     <span v-show="isExpanded">Create</span>
                     </Link>
                 </li>
@@ -63,13 +73,13 @@
                     <div id="media-screen-search" @click="toggleSearch">
                         <i class="fa fa-search"></i>
                     </div>
-                    <Link :href="route('create')" class="header-action" title="Channels">
+                    <Link :href="route('posts.create')" class="header-action" title="Channels">
                     <SvgIcon name="channels"></SvgIcon>
                     </Link>
-                    <Link :href="route('create')" class="header-action" title="Create Post">
+                    <Link :href="route('posts.create')" class="header-action" title="Create Post">
                     <SvgIcon name="create"></SvgIcon>
                     </Link>
-                    <Link :href="route('create')" class="header-action" title="Settings">
+                    <Link :href="route('posts.create')" class="header-action" title="Settings">
                         <SvgIcon name="settings"></SvgIcon>
                     </Link>
                     <div class="profile-img">
@@ -182,6 +192,7 @@ const logout = () => {
         padding: 15px 10px 60px;
         height: 100vh;
         overflow-y: auto;
+        overflow-x: hidden;
         scrollbar-width: thin;
         scrollbar-color: #000000 transparent;
         transition: width 0.3s;

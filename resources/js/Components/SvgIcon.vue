@@ -68,6 +68,17 @@ const icons = {
                 </svg>
 
            `,
+    calendar: `<svg viewBox="0 0 25 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M4 6H21M7 3V6M18 3V6M5 6H20C20.5523 6 21 6.44772 21 7V21C21 21.5523 20.5523 22 20 22H5C4.44772 22 4 21.5523 4 21V7C4 6.44772 4.44772 6 5 6Z"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+
+                `,
 };
 
 const icon = computed(() => {
