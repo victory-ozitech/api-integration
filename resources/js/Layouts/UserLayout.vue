@@ -17,37 +17,37 @@
                 </div>
             </div>
             <ul>
-                <li :class="{
+                <li @click="toggleExpand" :class="{
                     active: isActiveRoute('dashboard'),
                 }">
-                    <SvgIcon name="dashboard" @click="toggleExpand" />
+                    <SvgIcon name="dashboard" />
                     <Link :href="route('dashboard')">
                     <span v-show="isExpanded"> Dashboard </span>
                     </Link>
                 </li>
 
-                <li :class="{
+                <li @click="toggleExpand" :class="{
                     active: isActiveRoute('facebook.connect'),
                 }">
-                    <SvgIcon name="channels" @click="toggleExpand" />
+                    <SvgIcon name="channels" />
                     <Link :href="route('facebook.connect')">
                     <span v-show="isExpanded">Channels</span>
                     </Link>
                 </li>
 
-                <li :class="{
+                <li @click="toggleExpand" :class="{
                     active: isActiveRoute('posts.index'),
                 }">
-                    <SvgIcon name="calendar" @click="toggleExpand" />
+                    <SvgIcon name="calendar" />
                     <Link :href="route('posts.index')">
                     <span v-show="isExpanded">Calendar</span>
                     </Link>
                 </li>
 
-                <li :class="{
+                <li @click="toggleExpand" :class="{
                     active: isActiveRoute('posts.create'),
                 }">
-                    <SvgIcon name="create" @click="toggleExpand" />
+                    <SvgIcon name="create" />
                     <Link :href="route('posts.create')">
                     <span v-show="isExpanded">Create</span>
                     </Link>
@@ -80,12 +80,12 @@
                     <SvgIcon name="create"></SvgIcon>
                     </Link>
                     <Link :href="route('posts.create')" class="header-action" title="Settings">
-                        <SvgIcon name="settings"></SvgIcon>
+                    <SvgIcon name="settings"></SvgIcon>
                     </Link>
                     <div class="profile-img">
                         <img :src="'/assets/images/profile-img.png'" alt="ReliaCRM" />
                     </div>
-                    
+
                     <button type="button" class="header-action header-action--button" title="Help">
                         <SvgIcon name="question"></SvgIcon>
                     </button>
@@ -152,6 +152,10 @@ const logout = () => {
     // ul{
     //     display: block !important;
     // }
+}
+
+.flex-cont aside ul li {
+    cursor: pointer !important;
 }
 
 .logout-btn {
