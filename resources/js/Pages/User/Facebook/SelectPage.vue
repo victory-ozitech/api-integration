@@ -9,7 +9,6 @@
 <script setup>
 import UserLayout from '@/Layouts/UserLayout.vue';
 </script>
-<<<<<<< HEAD
 
 <style scoped>
 .select-page-wrapper {
@@ -52,5 +51,3 @@ import UserLayout from '@/Layouts/UserLayout.vue';
     background: #166fe5;
 }
 </style>
-=======
->>>>>>> b3e9c68b053fc6d5ef768f93a2a1b932a9732255
