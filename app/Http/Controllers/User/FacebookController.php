@@ -13,11 +13,33 @@ class FacebookController extends Controller
 {
     public function connect()
     {
-        $facebookAccount = FacebookAccount::where('user_id', 1)->first(); // Replace with actual authenticated user ID
-        return Inertia::render('User/Facebook/SelectPage', 
-        [
-            'facebookAccount' => $facebookAccount
-        ]);
+        $facebookAccount = FacebookAccount::where('user_id', 1)->first();
+
+        if (!$facebookAccount) {
+
+            return back()->with(
+                'error',
+                'No Facebook account connected.'
+            );
+        }
+
+        $response = Http::get(
+            'https://graph.facebook.com/v25.0/me/accounts',
+            [
+                'access_token' => $facebookAccount->access_token,
+            ]
+        );
+
+        $pagesData = $response->json();
+
+        return Inertia::render(
+            'User/Facebook/SelectPage',
+            [
+                'facebookAccount' => $facebookAccount,
+
+                'pages' => $pagesData['data'] ?? [],
+            ]
+        );
     }
     public function redirectToFacebook()
     {
