@@ -14,7 +14,7 @@
                         {{ day.date.getDate() }}
                     </div>
 
-                    <button v-if="isFutureOrToday(day.date)" class="add-btn" @click.stop="openModal"
+                    <button v-if="isFutureOrToday(day.date)" class="add-btn" @click.stop="openModal(day.date)"
                         title="Schedule New Post">
                         <i class="fa-solid fa-plus"></i>
                     </button>
@@ -22,7 +22,7 @@
 
                 <transition-group name="fade" tag="div" class="event-list">
                     <div v-for="post in getPostsForDate(day.date)" :key="post.id" :title="post.content"
-                        class="post-pill" @click.stop="openPostsModal">
+                        class="post-pill" @click.stop="openPostsModal({post, date: day.date})">
                         {{ post.content.slice(0, 30) }}
                     </div>
                 </transition-group>
@@ -126,13 +126,13 @@ const openModal = (date) => {
     emit("open-modal", date);
 };
 
-const openPostsModal = (date) => {
-    emit("open-posts-modal", date);
+const openPostsModal = ({post, date}) => {
+    emit("open-posts-modal", {post, date});
 };
 
-const openEditModal = (post) => {
-    emit("open-edit-modal", post);
-};
+// const openPostsModal = (date) => {
+//     emit("open-posts-modal", date);
+// };
 </script>
 
 
@@ -273,7 +273,7 @@ const openEditModal = (post) => {
     font-size: 12px;
     line-height: 1.4;
     background: linear-gradient(135deg, $primary, $secondary);
-    color: #fff;
+    color: Ssecondary;
     padding: 10px 12px;
     border-radius: 16px;
     box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);

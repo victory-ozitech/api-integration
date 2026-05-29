@@ -139,8 +139,8 @@ const handleOpenModal = (date) => {
     emit("open-modal", date);
 };
 
-const handleOpenPostsModal = (date) => {
-    emit("open-posts-modal", date);
+const handleOpenPostsModal = ({post, date}) => {
+    emit("open-posts-modal", { post, date });
 };
 
 const forwardOpenEditModal = (post) => {

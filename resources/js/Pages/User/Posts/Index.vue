@@ -4,9 +4,9 @@
             @formSubmit="handleFormSubmit" @closeModal="showModal = false" />
 
 
-        <ScheduledPostModal v-if="showScheduledPostsModal" :posts="filteredPosts" :isVisible="showScheduledPostsModal"
-            :post="selectedPost" :currentDate="currentDate" :selectedDate="selectedDateForModal"
-            @closeModal="closeScheduledPostsModal" @open-modal="handleOpenModal" />
+        <ScheduledPostModal v-if="showScheduledPostsModal" :post="selectedPost"
+            :currentDate="currentDate" :selectedDate="selectedDateForModal" @closeModal="closeScheduledPostsModal"
+            @open-modal="handleOpenModal" @open-edit-modal="openEditModal" />
 
         <div class="container py-4">
 
@@ -74,11 +74,13 @@ const handleOpenModal = (date) => {
     // console.log('Handle Open Modal Date:', date);
     selectedPost.value = null; // Reset post (for new post creation)
     showModal.value = true;
+    showScheduledPostsModal.value = false;
 };
 
-const openScheduledPostsModal = (date) => {
+const openScheduledPostsModal = ({post, date}) => {
+    selectedPost.value = post;
     selectedDateForModal.value = date;
-    // console.log('Open Scheduled Posts Modal Date:', date);
+    // console.log('Open Scheduled Posts Modal Date:', date, post);
     showScheduledPostsModal.value = true;
 };
 
@@ -89,7 +91,10 @@ const closeScheduledPostsModal = () => {
 
 const openEditModal = (post) => {
     selectedPost.value = post;
+    console.log('Post to be Edited: ', post);
+    
     showModal.value = true; // Open the modal
+    showScheduledPostsModal.value = false;
 };
 
 const handleFormSubmit = () => {

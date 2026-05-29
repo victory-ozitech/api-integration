@@ -89,7 +89,8 @@ const closeModal = () => {
 @use "@sass/mixins.scss" as mixin;
 @use "@sass/variables.scss" as *;
 
-.modal-overlay {position: fixed;
+.modal-overlay {
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;

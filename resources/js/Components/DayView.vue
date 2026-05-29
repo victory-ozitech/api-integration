@@ -90,7 +90,7 @@ const postsForHour = (hour) => {
     // background: #eef2ff;
     // color: #1e293b;
     background: linear-gradient(135deg, $primary, $secondary);
-    color: #fff;
+    color: $secondary;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
     font-size: 13px;
     line-height: 1.6;
