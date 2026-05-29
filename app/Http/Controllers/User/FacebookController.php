@@ -11,35 +11,36 @@ use Inertia\Inertia;
 
 class FacebookController extends Controller
 {
-    public function connect()
+   public function connect()
     {
         $facebookAccount = FacebookAccount::where('user_id', 1)->first();
 
+        // Not connected yet — just show the connect button
         if (!$facebookAccount) {
-
-            return back()->with(
-                'error',
-                'No Facebook account connected.'
-            );
+            return Inertia::render('User/Facebook/SelectPage', [
+                'facebookAccount' => null,
+                'pages' => [],
+            ]);
         }
 
-        $response = Http::get(
-            'https://graph.facebook.com/v25.0/me/accounts',
-            [
-                'access_token' => $facebookAccount->access_token,
-            ]
-        );
+        // Connected — fetch their pages to display
+        $response = Http::get('https://graph.facebook.com/v25.0/me/accounts', [
+            'access_token' => $facebookAccount->access_token,
+            'fields' => 'id,name,access_token,category,picture',
+        ]);
 
         $pagesData = $response->json();
 
-        return Inertia::render(
-            'User/Facebook/SelectPage',
-            [
-                'facebookAccount' => $facebookAccount,
+        if (isset($pagesData['error'])) {
+            // Token expired, make them reconnect
+            $facebookAccount->delete();
+            return redirect()->route('facebook.connect');
+        }
 
-                'pages' => $pagesData['data'] ?? [],
-            ]
-        );
+        return Inertia::render('User/Facebook/SelectPage', [
+            'facebookAccount' => $facebookAccount,
+            'pages' => $pagesData['data'] ?? [],
+        ]);
     }
     public function redirectToFacebook()
     {
@@ -117,24 +118,24 @@ class FacebookController extends Controller
         return redirect()->route('facebook.page');
     }
 
-    public function getFacebookPages()
-    {
-        $facebookAccount = FacebookAccount::where('user_id', 1)->first(); // Replace with actual authenticated user ID
+    // public function getFacebookPages()
+    // {
+    //     $facebookAccount = FacebookAccount::where('user_id', 1)->first(); // Replace with actual authenticated user ID
 
-        if (!$facebookAccount) {
-            return response()->json(['error' => 'No Facebook account linked'], 404);
-        }
+    //     if (!$facebookAccount) {
+    //         return response()->json(['error' => 'No Facebook account linked'], 404);
+    //     }
 
-        $response = Http::get('https://graph.facebook.com/v25.0/me/accounts', [
-            'access_token' => $facebookAccount->access_token,
-        ]);
+    //     $response = Http::get('https://graph.facebook.com/v25.0/me/accounts', [
+    //         'access_token' => $facebookAccount->access_token,
+    //     ]);
 
-        $pagesData = $response->json();
+    //     $pagesData = $response->json();
 
-        return Inertia::render('User/Posts/Index', [
-            'pages' => $pagesData['data'] ?? []
-        ]);
-    }
+    //     return Inertia::render('User/Posts/Index', [
+    //         'pages' => $pagesData['data'] ?? []
+    //     ]);
+    // }
 
     public function selectPage(Request $request)
     {
