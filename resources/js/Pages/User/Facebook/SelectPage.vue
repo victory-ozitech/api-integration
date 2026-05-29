@@ -1,46 +1,15 @@
 <template>
     <UserLayout>
-        <div class="select-page-wrapper">
-
-            <div class="select-card">
-
-                <!-- Icon -->
-                <div class="icon">
-                    <i class="fa-brands fa-square-facebook"></i>
-                </div>
-
-                <!-- Title -->
-                <h2>Connect a Facebook Page</h2>
-
-                <!-- Subtitle -->
-                <p class="text-muted">
-                    Select a Facebook page to manage and schedule your posts.
-                </p>
-
-                <!-- CTA -->
-                <button class="btn btn-primary btn-lg w-100 mt-3" @click="selectPage">
-                    Continue with Facebook
-                </button>
-
-                <!-- Extra info -->
-                <p class="small text-muted mt-3">
-                    You’ll be redirected to Facebook to choose a page and grant access.
-                </p>
-
-            </div>
-
-        </div>
+        <a :href="route('facebook.redirect')" class="btn btn-primary">
+            Connect Facebook
+        </a>
     </UserLayout>
 </template>
 
 <script setup>
 import UserLayout from '@/Layouts/UserLayout.vue';
-import {router} from '@inertiajs/vue3';
-
-const selectPage = () => {
-    router.get(route('facebook.redirect'));
-}
 </script>
+<<<<<<< HEAD
 
 <style scoped>
 .select-page-wrapper {
@@ -83,3 +52,5 @@ const selectPage = () => {
     background: #166fe5;
 }
 </style>
+=======
+>>>>>>> b3e9c68b053fc6d5ef768f93a2a1b932a9732255

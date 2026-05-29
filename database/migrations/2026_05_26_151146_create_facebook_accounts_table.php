@@ -20,6 +20,9 @@ return new class extends Migration
             $table->text('avatar')->nullable();
             $table->text('access_token');
             $table->timestamp('expires_in')->nullable();
+            $table->string('page_id')->nullable();
+            $table->string('page_name')->nullable();
+            $table->longText('page_access_token')->nullable();
             $table->timestamps();
         });
     }
