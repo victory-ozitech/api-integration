@@ -1,6 +1,35 @@
 <template>
     <UserLayout>
-        <button class="btn btn-primary" @click="selectPage">Select Facebook Page</button>
+        <div class="select-page-wrapper">
+
+            <div class="select-card">
+
+                <!-- Icon -->
+                <div class="icon">
+                    <i class="fa-brands fa-square-facebook"></i>
+                </div>
+
+                <!-- Title -->
+                <h2>Connect a Facebook Page</h2>
+
+                <!-- Subtitle -->
+                <p class="text-muted">
+                    Select a Facebook page to manage and schedule your posts.
+                </p>
+
+                <!-- CTA -->
+                <button class="btn btn-primary btn-lg w-100 mt-3" @click="selectPage">
+                    Continue with Facebook
+                </button>
+
+                <!-- Extra info -->
+                <p class="small text-muted mt-3">
+                    You’ll be redirected to Facebook to choose a page and grant access.
+                </p>
+
+            </div>
+
+        </div>
     </UserLayout>
 </template>
 
@@ -12,3 +41,44 @@ const selectPage = () => {
     router.get(route('facebook.redirect'));
 }
 </script>
+
+<style scoped>
+.select-page-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+}
+
+.select-card {
+    width: 420px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.icon {
+    font-size: 40px;
+    color: #1877f2;
+    margin-bottom: 10px;
+}
+
+.select-card h2 {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.btn-primary {
+    background: #1877f2;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background: #166fe5;
+}
+</style>
