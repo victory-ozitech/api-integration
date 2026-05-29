@@ -1,4 +1,45 @@
-﻿<script setup>
+﻿<template>
+    <div class="calendar-shell">
+        <div class="calendar-header mb-3">
+            <div class="calendar-controls">
+                <div class="navigation-group">
+                    <button type="button" class="nav-btn" @click="prev"><i class="fa-solid fa-arrow-left"></i></button>
+                    <button type="button" class="nav-btn" @click="next"><i class="fa-solid fa-arrow-right"></i></button>
+                    <button type="button" class="today-btn" @click="currentDate = new Date()">Today</button>
+                </div>
+
+                <div class="calendar-title">
+                    <h4>{{ currentLabel }}</h4>
+                </div>
+
+                <div class="view-switcher">
+                    <button type="button" @click="view = 'month'" class="view-btn"
+                        :class="{ 'view-btn--active': view === 'month' }">
+                        Month
+                    </button>
+                    <button type="button" @click="view = 'week'" class="view-btn"
+                        :class="{ 'view-btn--active': view === 'week' }">
+                        Week
+                    </button>
+                    <button type="button" @click="view = 'day'" class="view-btn"
+                        :class="{ 'view-btn--active': view === 'day' }">
+                        Day
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <transition name="calendar-fade" mode="out-in">
+            <component :is="currentView" :posts="posts" :currentDate="currentDate" :key="view"
+                @open-modal="handleOpenModal" @open-edit-modal="forwardOpenEditModal"
+                @open-posts-modal="handleOpenPostsModal" />
+        </transition>
+    </div>
+</template>
+
+
+
+<script setup>
 import { ref, computed } from "vue";
 
 //Views
@@ -8,12 +49,15 @@ import DayView from "./DayView.vue";
 
 // Props
 const props = defineProps({
-    posts: Array
+    posts: Array,
+    currentDate: {
+        type: [Date, String],
+        required: true,
+    },
 });
 
 //State(s)
 const view = ref("month"); // month | week | day
-const currentDate = ref(new Date());
 
 const views = {
     month: MonthView,
@@ -25,7 +69,7 @@ const views = {
 const currentView = computed(() => views[view.value]);
 
 const currentLabel = computed(() => {
-    const d = currentDate.value;
+    const d = props.currentDate;
 
     if (view.value === "month") return formatMonth(d);
     if (view.value === "week") return formatWeek(d);
@@ -34,23 +78,23 @@ const currentLabel = computed(() => {
 
 // Navigation
 const next = () => {
-    const d = new Date(currentDate.value);
+    const d = new Date(props.currentDate);
 
     if (view.value === "month") d.setMonth(d.getMonth() + 1);
     if (view.value === "week") d.setDate(d.getDate() + 7);
     if (view.value === "day") d.setDate(d.getDate() + 1);
 
-    currentDate.value = d;
+    props.currentDate = d;
 };
 
 const prev = () => {
-    const d = new Date(currentDate.value);
+    const d = new Date(props.currentDate);
 
     if (view.value === "month") d.setMonth(d.getMonth() - 1);
     if (view.value === "week") d.setDate(d.getDate() - 7);
     if (view.value === "day") d.setDate(d.getDate() - 1);
 
-    currentDate.value = d;
+    props.currentDate = d;
 };
 
 // Formatting
@@ -83,44 +127,28 @@ const formatWeek = (date) => {
 
     return `${startStr} - ${endStr}`;
 };
+
+// Emit
+const emit = defineEmits([
+    "open-modal",
+    "open-posts-modal",
+    "open-edit-modal",
+]);
+
+const handleOpenModal = (date) => {
+    emit("open-modal", date);
+};
+
+const handleOpenPostsModal = (date) => {
+    emit("open-posts-modal", date);
+};
+
+const forwardOpenEditModal = (post) => {
+    emit("open-edit-modal", post);
+};
 </script>
 
-<template>
-    <div class="calendar-shell">
-        <div class="calendar-header mb-3">
-            <div class="calendar-controls">
-                <div class="navigation-group">
-                    <button type="button" class="nav-btn" @click="prev"><i class="fa-solid fa-arrow-left"></i></button>
-                    <button type="button" class="nav-btn" @click="next"><i class="fa-solid fa-arrow-right"></i></button>
-                    <button type="button" class="today-btn" @click="currentDate = new Date()">Today</button>
-                </div>
 
-                <div class="calendar-title">
-                    <h4>{{ currentLabel }}</h4>
-                </div>
-
-                <div class="view-switcher">
-                    <button type="button" @click="view = 'month'" class="view-btn"
-                        :class="{ 'view-btn--active': view === 'month' }">
-                        Month
-                    </button>
-                    <button type="button" @click="view = 'week'" class="view-btn"
-                        :class="{ 'view-btn--active': view === 'week' }">
-                        Week
-                    </button>
-                    <button type="button" @click="view = 'day'" class="view-btn"
-                        :class="{ 'view-btn--active': view === 'day' }">
-                        Day
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <transition name="calendar-fade" mode="out-in">
-            <component :is="currentView" :posts="posts" :currentDate="currentDate" :key="view" />
-        </transition>
-    </div>
-</template>
 
 <style lang="scss">
 @use '@sass/app.scss' as *;

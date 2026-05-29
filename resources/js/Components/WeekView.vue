@@ -48,8 +48,8 @@ const getPostsForDate = (date) => {
 
             <div class="event-list">
                 <transition-group name="fade" tag="div">
-                    <div v-for="post in getPostsForDate(day)" :key="post.id" class="post-pill">
-                        {{ post.content.slice(0, 40) }}
+                    <div v-for="post in getPostsForDate(day)" :key="post.id" :title="post.content" class="post-pill">
+                        {{ post.content.slice(0, 15) }}
                     </div>
                 </transition-group>
 

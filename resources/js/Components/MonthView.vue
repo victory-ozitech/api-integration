@@ -1,4 +1,37 @@
-﻿<script setup>
+﻿<template>
+    <div class="month-calendar">
+        <div class="calendar-weekdays">
+            <div v-for="label in weekdayLabels" :key="label" class="weekday-label">
+                {{ label }}
+            </div>
+        </div>
+
+        <div class="calendar-grid">
+            <div v-for="(day, i) in monthDays" :key="i" :class="['calendar-cell', { 'calendar-cell--outside': !day.isCurrentMonth, 'calendar-cell--today': isToday(day.date) }
+            ]">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div :class="['date', { 'date--today': isToday(day.date), 'date--outside': !day.isCurrentMonth }]">
+                        {{ day.date.getDate() }}
+                    </div>
+
+                    <button v-if="isFutureOrToday(day.date)" class="add-btn" @click.stop="openModal"
+                        title="Schedule New Post">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+
+                <transition-group name="fade" tag="div" class="event-list">
+                    <div v-for="post in getPostsForDate(day.date)" :key="post.id" :title="post.content"
+                        class="post-pill" @click.stop="openPostsModal">
+                        {{ post.content.slice(0, 30) }}
+                    </div>
+                </transition-group>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup>
 import { computed } from "vue";
 
 // Props
@@ -9,29 +42,6 @@ const props = defineProps({
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// Computed
-// const monthDays = computed(() => {
-//     const date = new Date(props.currentDate);
-//     const year = date.getFullYear();
-//     const month = date.getMonth();
-
-//     const firstDay = new Date(year, month, 1).getDay();
-//     const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-//     const days = [];
-
-//     // Empty slots
-//     for (let i = 0; i < firstDay; i++) {
-//         days.push(null);
-//     }
-
-//     // Real days
-//     for (let i = 1; i <= daysInMonth; i++) {
-//         days.push(new Date(year, month, i));
-//     }
-
-//     return days;
-// });
 const monthDays = computed(() => {
     const date = new Date(props.currentDate);
 
@@ -75,12 +85,25 @@ const monthDays = computed(() => {
     return days;
 });
 
+// Methods
 const isToday = (date) => {
     if (!date) return false;
     return new Date(date).toDateString() === new Date().toDateString();
 };
 
-// Methods
+const isFutureOrToday = (date) => {
+    if (!date) return false;
+
+    const target = new Date(date);
+    const today = new Date();
+
+    // Normalize time
+    target.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    return target >= today;
+};
+
 const getPostsForDate = (date) => {
     if (!date) return [];
 
@@ -91,39 +114,59 @@ const getPostsForDate = (date) => {
         return d === dayStr;
     });
 };
+
+// Emit
+const emit = defineEmits([
+    "open-modal",
+    "open-posts-modal",
+    "open-edit-modal",
+]);
+
+const openModal = (date) => {
+    emit("open-modal", date);
+};
+
+const openPostsModal = (date) => {
+    emit("open-posts-modal", date);
+};
+
+const openEditModal = (post) => {
+    emit("open-edit-modal", post);
+};
 </script>
 
-<template>
-    <div class="month-calendar">
-        <div class="calendar-weekdays">
-            <div v-for="label in weekdayLabels" :key="label" class="weekday-label">
-                {{ label }}
-            </div>
-        </div>
 
-        <div class="calendar-grid">
-            <div v-for="(day, i) in monthDays" :key="i" :class="['calendar-cell', { 'calendar-cell--outside': !day.isCurrentMonth, 'calendar-cell--today': isToday(day.date) }
-            ]">
-                <!-- :class="['calendar-cell', { 'calendar-cell--empty': !day, 'calendar-cell--today': isToday(day) }]" -->
-                <div :class="['date', { 'date--today': isToday(day.date), 'date--outside': !day.isCurrentMonth }]">
-                    {{ day.date.getDate() }}
-                </div>
 
-                <transition-group name="fade" tag="div" class="event-list">
-                    <div v-for="post in getPostsForDate(day.date)" :key="post.id" :title="post.content" class="post-pill">
-                        {{ post.content.slice(0, 30) }}
-                    </div>
-                </transition-group>
-            </div>
-        </div>
-    </div>
-</template>
+<style lang="scss">
+@use '@sass/app.scss' as *;
+@use "@sass/mixins.scss" as mixin;
+@use "@sass/variables.scss" as *;
 
-<style>
 .month-calendar {
     display: flex;
     flex-direction: column;
     gap: 14px;
+}
+
+.add-btn {
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    // background: #f8fafc;
+    background: transparent;
+    border-radius: 4px;
+    padding: 2px 4px;
+    cursor: pointer;
+    @include mixin.dynamic-text(700, 11px, #0f172a, center);
+    margin-top: 7px;
+    transition: all 0.18s ease;opacity: 0;
+        visibility: hidden;
+        transform: translateY(4px);
+
+    &:hover {
+        background: $secondary;
+        // transform: translateY(-1px);
+        color: #1F2937;
+        border-color: rgba(99, 102, 241, 0.25);
+    }
 }
 
 .calendar-weekdays {
@@ -165,6 +208,12 @@ const getPostsForDate = (date) => {
     border-color: rgba(15, 23, 42, 0.1);
 }
 
+.calendar-cell:hover .add-btn {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
 .calendar-cell--empty {
     background: #f8fafc;
 }
@@ -186,7 +235,7 @@ const getPostsForDate = (date) => {
 
 .date--today {
     background: #eef2ff;
-    color: #3730a3;
+    color: $primary;
 }
 
 .calendar-cell--outside {
@@ -209,7 +258,7 @@ const getPostsForDate = (date) => {
 }
 
 .calendar-cell--today .date {
-    background: #4f46e5;
+    background: $primary;
     color: white;
 }
 
@@ -223,7 +272,7 @@ const getPostsForDate = (date) => {
     display: block;
     font-size: 12px;
     line-height: 1.4;
-    background: linear-gradient(135deg, #4f46e5, #2563eb);
+    background: linear-gradient(135deg, $primary, $secondary);
     color: #fff;
     padding: 10px 12px;
     border-radius: 16px;

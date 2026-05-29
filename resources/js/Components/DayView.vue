@@ -37,7 +37,11 @@ const postsForHour = (hour) => {
     </div>
 </template>
 
-<style>
+<style lang="scss">
+@use '@sass/app.scss' as *;
+@use "@sass/mixins.scss" as mixin;
+@use "@sass/variables.scss" as *;
+
 .day-view {
     display: flex;
     flex-direction: column;
@@ -51,6 +55,7 @@ const postsForHour = (hour) => {
     padding: 14px 0;
     border-bottom: 1px solid rgba(148, 163, 184, 0.18);
     transition: background-color 0.18s ease;
+    border-radius: 10px;
 }
 
 .day-row:hover {
@@ -82,8 +87,10 @@ const postsForHour = (hour) => {
 .post-pill {
     padding: 14px 16px;
     border-radius: 18px;
-    background: #eef2ff;
-    color: #1e293b;
+    // background: #eef2ff;
+    // color: #1e293b;
+    background: linear-gradient(135deg, $primary, $secondary);
+    color: #fff;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
     font-size: 13px;
     line-height: 1.6;

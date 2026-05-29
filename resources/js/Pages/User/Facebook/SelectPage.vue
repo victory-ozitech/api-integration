@@ -48,6 +48,7 @@ const selectPage = () => {
     justify-content: center;
     align-items: center;
     min-height: 70vh;
+    padding: 15px;
 }
 
 .select-card {
