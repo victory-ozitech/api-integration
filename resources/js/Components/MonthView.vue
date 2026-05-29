@@ -10,24 +10,66 @@ const props = defineProps({
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 // Computed
+// const monthDays = computed(() => {
+//     const date = new Date(props.currentDate);
+//     const year = date.getFullYear();
+//     const month = date.getMonth();
+
+//     const firstDay = new Date(year, month, 1).getDay();
+//     const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+//     const days = [];
+
+//     // Empty slots
+//     for (let i = 0; i < firstDay; i++) {
+//         days.push(null);
+//     }
+
+//     // Real days
+//     for (let i = 1; i <= daysInMonth; i++) {
+//         days.push(new Date(year, month, i));
+//     }
+
+//     return days;
+// });
 const monthDays = computed(() => {
     const date = new Date(props.currentDate);
+
     const year = date.getFullYear();
     const month = date.getMonth();
 
-    const firstDay = new Date(year, month, 1).getDay();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+
     const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
 
     const days = [];
 
-    // Empty slots
-    for (let i = 0; i < firstDay; i++) {
-        days.push(null);
+    // Previous month days
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+        days.push({
+            date: new Date(year, month - 1, daysInPrevMonth - i),
+            isCurrentMonth: false,
+        });
     }
 
-    // Real days
+    // Current month days
     for (let i = 1; i <= daysInMonth; i++) {
-        days.push(new Date(year, month, i));
+        days.push({
+            date: new Date(year, month, i),
+            isCurrentMonth: true,
+        });
+    }
+
+    // Fill remaining cells (42 total = 6 weeks)
+    const remaining = 42 - days.length;
+
+    for (let i = 1; i <= remaining; i++) {
+        days.push({
+            date: new Date(year, month + 1, i),
+            isCurrentMonth: false,
+        });
     }
 
     return days;
@@ -60,17 +102,15 @@ const getPostsForDate = (date) => {
         </div>
 
         <div class="calendar-grid">
-            <div
-                v-for="(day, i) in monthDays"
-                :key="i"
-                :class="['calendar-cell', { 'calendar-cell--empty': !day, 'calendar-cell--today': isToday(day) }]"
-            >
-                <div v-if="day" :class="['date', { 'date--today': isToday(day) }]">
-                    {{ day.getDate() }}
+            <div v-for="(day, i) in monthDays" :key="i" :class="['calendar-cell', { 'calendar-cell--outside': !day.isCurrentMonth, 'calendar-cell--today': isToday(day.date) }
+            ]">
+                <!-- :class="['calendar-cell', { 'calendar-cell--empty': !day, 'calendar-cell--today': isToday(day) }]" -->
+                <div :class="['date', { 'date--today': isToday(day.date), 'date--outside': !day.isCurrentMonth }]">
+                    {{ day.date.getDate() }}
                 </div>
 
                 <transition-group name="fade" tag="div" class="event-list">
-                    <div v-for="post in getPostsForDate(day)" :key="post.id" class="post-pill">
+                    <div v-for="post in getPostsForDate(day.date)" :key="post.id" :title="post.content" class="post-pill">
                         {{ post.content.slice(0, 30) }}
                     </div>
                 </transition-group>
@@ -140,12 +180,37 @@ const getPostsForDate = (date) => {
     font-size: 13px;
     font-weight: 700;
     color: #334155;
+    /* background: #DFF5E7; */
     margin-bottom: 12px;
 }
 
 .date--today {
     background: #eef2ff;
     color: #3730a3;
+}
+
+.calendar-cell--outside {
+    background: #f8fafc;
+    opacity: 0.65;
+}
+
+.date--outside {
+    color: #94a3b8;
+}
+
+.calendar-cell--outside .post-pill {
+    opacity: 0.5;
+}
+
+.calendar-cell--outside:hover {
+    transform: none;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04);
+    border-color: rgba(15, 23, 42, 0.08);
+}
+
+.calendar-cell--today .date {
+    background: #4f46e5;
+    color: white;
 }
 
 .event-list {

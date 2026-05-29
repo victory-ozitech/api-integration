@@ -90,8 +90,8 @@ const formatWeek = (date) => {
         <div class="calendar-header mb-3">
             <div class="calendar-controls">
                 <div class="navigation-group">
-                    <button type="button" class="nav-btn" @click="prev">←</button>
-                    <button type="button" class="nav-btn" @click="next">→</button>
+                    <button type="button" class="nav-btn" @click="prev"><i class="fa-solid fa-arrow-left"></i></button>
+                    <button type="button" class="nav-btn" @click="next"><i class="fa-solid fa-arrow-right"></i></button>
                     <button type="button" class="today-btn" @click="currentDate = new Date()">Today</button>
                 </div>
 
@@ -122,7 +122,11 @@ const formatWeek = (date) => {
     </div>
 </template>
 
-<style>
+<style lang="scss">
+@use '@sass/app.scss' as *;
+@use "@sass/mixins.scss" as mixin;
+@use "@sass/variables.scss" as *;
+
 .calendar-shell {
     display: flex;
     flex-direction: column;
@@ -180,7 +184,8 @@ const formatWeek = (date) => {
 .today-btn:hover,
 .view-btn:hover {
     transform: translateY(-1px);
-    background: #eef2ff;
+    background: $secondary;
+    color: #1F2937;
     border-color: rgba(99, 102, 241, 0.25);
 }
 
@@ -206,7 +211,7 @@ const formatWeek = (date) => {
 }
 
 .view-btn--active {
-    background: #6366f1;
+    background: $primary;
     color: white;
     box-shadow: 0 10px 24px rgba(99, 102, 241, 0.18);
 }

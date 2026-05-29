@@ -123,6 +123,7 @@ const getPostsForDate = (date) => {
     color: #1e293b;
     padding: 12px 14px;
     border-radius: 18px;
+    margin-bottom: 10px;
     font-size: 13px;
     line-height: 1.5;
     box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);

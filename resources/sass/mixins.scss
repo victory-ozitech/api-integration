@@ -8,7 +8,7 @@
   $size: 17px,
   $color: #000,
   $align: start,
-  $family: var(--font-apple),
+  $family: inherit,
   $line-height: inherit
 ) {
   line-height: $line-height;
