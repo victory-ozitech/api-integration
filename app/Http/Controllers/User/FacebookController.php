@@ -139,6 +139,11 @@ class FacebookController extends Controller
 
     public function selectPage(Request $request)
     {
+        $request->validate([
+            'page_id' => 'required',
+            'page_name' => 'required',
+            'page_access_token' => 'required',
+        ]);
         $facebookAccount = FacebookAccount::where('user_id', 1)->first();
 
         // Save selected page
