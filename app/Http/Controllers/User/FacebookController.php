@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Channel;
 use App\Models\FacebookAccount;
 use App\Models\SchedulePost;
 use Illuminate\Http\Request;
@@ -107,13 +108,26 @@ class FacebookController extends Controller
             'page_access_token' => 'required',
         ]);
         $facebookAccount = FacebookAccount::where('user_id', 1)->first();
+        if (!$facebookAccount) {
+            return back()->with(
+                'error',
+                'Please connect your Facebook account first.'
+            );
+        }
 
         // Save selected page
-        $facebookAccount->update([
-            'page_id' => $request->page_id,
-            'page_name' => $request->page_name,
-            'page_access_token' => $request->page_access_token,
-        ]);
+        Channel::updateOrCreate(
+            [
+                'channel_id' => $request->page_id,
+            ],
+            [
+                'user_id' => 1,
+                'facebook_account_id' => $facebookAccount->id,
+                'platform' => 'facebook',
+                'channel_name' => $request->page_name,
+                'access_token' => $request->page_access_token,
+            ]
+        );
 
         // Fetch posts for selected page
         $response = Http::get(
