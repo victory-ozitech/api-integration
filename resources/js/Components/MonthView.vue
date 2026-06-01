@@ -42,50 +42,77 @@ const props = defineProps({
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+// const monthDays = computed(() => {
+//     const date = new Date(props.currentDate);
+
+//     const year = date.getFullYear();
+//     const month = date.getMonth();
+
+//     const firstDayIndex = new Date(year, month, 1).getDay();
+
+//     const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+//     const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+//     const days = [];
+
+//     // Previous month days
+//     for (let i = firstDayIndex - 1; i >= 0; i--) {
+//         days.push({
+//             date: new Date(year, month - 1, daysInPrevMonth - i),
+//             isCurrentMonth: false,
+//         });
+//     }
+
+//     // Current month days
+//     for (let i = 1; i <= daysInMonth; i++) {
+//         days.push({
+//             date: new Date(year, month, i),
+//             isCurrentMonth: true,
+//         });
+//     }
+
+//     // Fill remaining cells (42 total = 6 weeks)
+//     const remaining = 42 - days.length;
+
+//     for (let i = 1; i <= remaining; i++) {
+//         days.push({
+//             date: new Date(year, month + 1, i),
+//             isCurrentMonth: false,
+//         });
+//     }
+
+//     return days;
+// });
+
+// Methods
 const monthDays = computed(() => {
-    const date = new Date(props.currentDate);
+    const base = new Date(props.currentDate);
+    const year = base.getFullYear();
+    const month = base.getMonth();
 
-    const year = date.getFullYear();
-    const month = date.getMonth();
-
-    const firstDayIndex = new Date(year, month, 1).getDay();
-
+    const firstOfMonth = new Date(year, month, 1);
+    const startDayIndex = firstOfMonth.getDay(); // 0 = Sunday
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    const daysInPrevMonth = new Date(year, month, 0).getDate();
+    // Calculate exact cells needed: round up to nearest full week
+    const totalCells = Math.ceil((startDayIndex + daysInMonth) / 7) * 7;
 
+    const startDate = new Date(year, month, 1 - startDayIndex);
     const days = [];
 
-    // Previous month days
-    for (let i = firstDayIndex - 1; i >= 0; i--) {
+    for (let i = 0; i < totalCells; i++) {
+        const d = new Date(startDate);
+        d.setDate(startDate.getDate() + i);
         days.push({
-            date: new Date(year, month - 1, daysInPrevMonth - i),
-            isCurrentMonth: false,
-        });
-    }
-
-    // Current month days
-    for (let i = 1; i <= daysInMonth; i++) {
-        days.push({
-            date: new Date(year, month, i),
-            isCurrentMonth: true,
-        });
-    }
-
-    // Fill remaining cells (42 total = 6 weeks)
-    const remaining = 42 - days.length;
-
-    for (let i = 1; i <= remaining; i++) {
-        days.push({
-            date: new Date(year, month + 1, i),
-            isCurrentMonth: false,
+            date: d,
+            isCurrentMonth: d.getMonth() === month
         });
     }
 
     return days;
 });
 
-// Methods
 const isToday = (date) => {
     if (!date) return false;
     return new Date(date).toDateString() === new Date().toDateString();

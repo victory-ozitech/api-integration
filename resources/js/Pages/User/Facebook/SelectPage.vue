@@ -1,8 +1,39 @@
 <template>
     <UserLayout>
-        <a :href="route('facebook.redirect')" class="btn btn-primary">
-            Connect Facebook
-        </a>
+        <div class="select-page-wrapper">
+
+            <div class="select-card">
+
+                <!-- Icon -->
+                <div class="icon">
+                    <i class="bi bi-facebook"></i>
+                </div>
+
+                <!-- Title -->
+                <h2>Connect a Facebook Page</h2>
+
+                <!-- Subtitle -->
+                <p class="text-muted">
+                    Select a Facebook page to manage and schedule your posts.
+                </p>
+
+                <!-- CTA -->
+                <!-- <button class="btn btn-primary btn-lg w-100 mt-3" @click="selectPage">
+                    Continue with Facebook
+                    Connect Facebook
+                </button> -->
+                <a :href="route('facebook.redirect')" class="btn btn-primary btn-lg w-100 mt-3">
+                    Continue with Facebook
+                </a>
+
+                <!-- Extra info -->
+                <p class="small text-muted mt-3">
+                    You’ll be redirected to Facebook to choose a page and grant access.
+                </p>
+
+            </div>
+
+        </div>
     </UserLayout>
 </template>
 
