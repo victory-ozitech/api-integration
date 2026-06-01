@@ -24,7 +24,11 @@ class FacebookController extends Controller
         }
 
         // Connected — fetch their pages to display
-        $response = Http::get('https://graph.facebook.com/v25.0/me/accounts', [
+        // $response = Http::get('https://graph.facebook.com/v25.0/me/accounts', [
+        //     'access_token' => $facebookAccount->access_token,
+        //     'fields' => 'id,name,access_token,category,picture',
+        // ]);
+        $response = Http::withoutVerifying()->get('https://graph.facebook.com/v25.0/me/accounts', [
             'access_token' => $facebookAccount->access_token,
             'fields' => 'id,name,access_token,category,picture',
         ]);
@@ -80,7 +84,14 @@ class FacebookController extends Controller
             abort(403, 'Invalid state');
         }
 
-        $response = Http::get('https://graph.facebook.com/v25.0/oauth/access_token', [
+        // $response = Http::get('https://graph.facebook.com/v25.0/oauth/access_token', [
+        //     'client_id' => env('FACEBOOK_APP_ID'),
+        //     'client_secret' => env('FACEBOOK_APP_SECRET'),
+        //     'redirect_uri' => env('FACEBOOK_REDIRECT_URI'),
+        //     'code' => $request->code,
+        // ]);
+
+        $response = Http::withoutVerifying()->get('https://graph.facebook.com/v25.0/oauth/access_token', [
             'client_id' => env('FACEBOOK_APP_ID'),
             'client_secret' => env('FACEBOOK_APP_SECRET'),
             'redirect_uri' => env('FACEBOOK_REDIRECT_URI'),
@@ -96,10 +107,16 @@ class FacebookController extends Controller
         $accessToken = $tokenData['access_token'];
 
         // 2. Get user info
-        $userResponse = Http::get('https://graph.facebook.com/me', [
+        // $userResponse = Http::get('https://graph.facebook.com/me', [
+        //     'fields' => 'id,name,email,picture',
+        //     'access_token' => $accessToken,
+        // ]);
+
+        $userResponse = Http::withoutVerifying()->get('https://graph.facebook.com/me', [
             'fields' => 'id,name,email,picture',
             'access_token' => $accessToken,
         ]);
+        
 
         $userData = $userResponse->json();
 

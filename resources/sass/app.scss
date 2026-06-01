@@ -1,14 +1,13 @@
 // // ========================
 // // 🌌 GLOBAL BODY
 // // ========================// Local mixins and variables
-@use "./mixins" as mixin; 
-@use "./variables" as *; 
+@use "./mixins" as mixin;
+@use "./variables" as *;
 
 // Third-party libraries ========================
 // ⬆️ IMPORTS
 // ========================@use "bootstrap" as *;
 @use "@fortawesome/fontawesome-free/css/all.min.css" as *;
-
 
 .btn {
     display: flex;
@@ -36,4 +35,10 @@ body {
 
 .form-control {
     box-shadow: none !important;
+}
+
+.btn-primary {
+    background-color: $primary !important;
+    color: #fff;
+    border: $primary;
 }
