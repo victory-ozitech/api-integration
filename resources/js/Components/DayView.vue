@@ -1,30 +1,16 @@
-﻿<script setup>
-// Props
-const props = defineProps({
-    posts: Array,
-    currentDate: Date
-});
-
-// Computed
-const hours = Array.from({ length: 24 }, (_, i) => i);
-
-// Methods
-const postsForHour = (hour) => {
-    return props.posts.filter(p => {
-        const d = new Date(p.scheduled_at || p.created_at);
-        return d.getHours() === hour &&
-            d.toDateString() === props.currentDate.toDateString();
-    });
-};
-</script>
-
-<template>
+﻿<template>
     <div class="day-view">
         <div v-for="hour in hours" :key="hour" class="day-row">
             <div class="hour-label">{{ hour.toString().padStart(2, '0') }}:00</div>
+
+            <button v-if="isFutureOrToday(props.currentDate)" class="add-btn" @click="openModal(props.currentDate)">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+
             <div class="hour-content">
                 <transition-group name="slide-fade" tag="div" class="hour-events">
-                    <div v-for="post in postsForHour(hour)" :key="post.id" class="post-pill">
+                    <div v-for="post in postsForHour(hour)" :key="post.id" class="post-pill"
+                        @click.stop="openPostsModal(post)">
                         {{ post.content }}
                     </div>
                 </transition-group>
@@ -36,6 +22,54 @@ const postsForHour = (hour) => {
         </div>
     </div>
 </template>
+
+<script setup>
+// Props
+const props = defineProps({
+    posts: Array,
+    currentDate: Date
+});
+
+// Computed
+const hours = Array.from({ length: 24 }, (_, i) => i);
+
+// Methods
+const isFutureOrToday = (date) => {
+    if (!date) return false;
+
+    const target = new Date(date);
+    const today = new Date();
+
+    target.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    return target >= today;
+};
+
+const postsForHour = (hour) => {
+    return props.posts.filter(p => {
+        const d = new Date(p.scheduled_at || p.created_at);
+        return d.getHours() === hour &&
+            d.toDateString() === props.currentDate.toDateString();
+    });
+};
+
+// Emit
+const emit = defineEmits([
+    "open-modal",
+    "open-posts-modal",
+]);
+
+const openModal = (date) => {
+    emit("open-modal", date);
+};
+
+const openPostsModal = (post) => {
+    emit("open-posts-modal", { post, date: props.currentDate, });
+};
+</script>
+
+
 
 <style lang="scss">
 @use '@sass/app.scss' as *;
@@ -60,6 +94,36 @@ const postsForHour = (hour) => {
 
 .day-row:hover {
     background-color: rgba(238, 242, 255, 0.55);
+}
+
+.day-row:hover {
+    .add-btn {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+}
+
+.add-btn {
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    // background: #f8fafc;
+    background: transparent;
+    border-radius: 4px;
+    padding: 2px 4px;
+    cursor: pointer;
+    @include mixin.dynamic-text(700, 11px, #0f172a, center);
+    margin-top: 2px;
+    transition: all 0.18s ease;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+
+    &:hover {
+        background: $secondary;
+        // transform: translateY(-1px);
+        color: #1F2937;
+        border-color: rgba(99, 102, 241, 0.25);
+    }
 }
 
 .hour-label {
