@@ -37,6 +37,8 @@ class FacebookController extends Controller
             return redirect()->route('facebook.connect');
         }
 
+        return $facebookAccount;
+
         return Inertia::render('User/Facebook/SelectPage', [
             'facebookAccount' => $facebookAccount,
             'pages' => $pagesData['data'] ?? [],
