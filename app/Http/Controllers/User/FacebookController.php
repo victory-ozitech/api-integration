@@ -11,19 +11,19 @@ use Inertia\Inertia;
 
 class FacebookController extends Controller
 {
-   public function connect()
+       public function connect()
     {
         $facebookAccount = FacebookAccount::where('user_id', 1)->first();
 
-        // Not connected yet — just show the connect button
+            // Not connected yet — just show the connect button
         if (!$facebookAccount) {
-            return Inertia::render('User/Facebook/SelectPage', [
+            return Inertia::render('User/Facebook/ConnectPage', [
                 'facebookAccount' => null,
                 'pages' => [],
             ]);
         }
 
-        // Connected — fetch their pages to display
+            // Connected — fetch their pages to display
         // $response = Http::get('https://graph.facebook.com/v25.0/me/accounts', [
         //     'access_token' => $facebookAccount->access_token,
         //     'fields' => 'id,name,access_token,category,picture',
@@ -33,47 +33,128 @@ class FacebookController extends Controller
             'fields' => 'id,name,access_token,category,picture',
         ]);
 
-        $pagesData = $response->json();
+            $pagesData = $response->json();
 
-        // return $pagesData;
+            // return $pagesData;
 
-        if (isset($pagesData['error'])) {
+            if (isset($pagesData['error'])) {
             // Token expired, make them reconnect
             $facebookAccount->delete();
             return redirect()->route('facebook.connect');
         }
 
-        // return $facebookAccount;
+            // return $facebookAccount;
 
-        return Inertia::render('User/Facebook/SelectPage', [
+            return Inertia::render('User/Facebook/ConnectPage', [
             'facebookAccount' => $facebookAccount,
             'pages' => $pagesData['data'] ?? [],
         ]);
     }
+
+    // public function connect()
+    // {
+    //     $facebookAccount = FacebookAccount::where('user_id', 1)->first();
+
+    //     return Inertia::render('User/Facebook/ConnectPage', [
+    //         'facebookAccount' => $facebookAccount,
+    //     ]);
+    // }
+
+    // public function pages()
+    // {
+    //     $facebookAccount = FacebookAccount::where('user_id', 1)->first();
+
+    //     if (!$facebookAccount) {
+
+    //         return redirect()
+    //             ->route('facebook.connect')
+    //             ->with(
+    //                 'error',
+    //                 'Please connect Facebook first.'
+    //             );
+    //     }
+
+    //     $response = Http::withoutVerifying()->get(
+    //         'https://graph.facebook.com/v25.0/me/accounts',
+    //         [
+    //             'access_token' => $facebookAccount->access_token,
+    //             'fields' => 'id,name,access_token,category,picture',
+    //         ]
+    //     );
+
+    //     $pagesData = $response->json();
+
+    //     if (isset($pagesData['error'])) {
+
+    //         return redirect()
+    //             ->route('facebook.connect')
+    //             ->with(
+    //                 'error',
+    //                 'Facebook session expired.'
+    //             );
+    //     }
+
+    //     return Inertia::render(
+    //         'User/Facebook/SelectPage',
+    //         [
+    //             'pages' => $pagesData['data'] ?? [],
+    //         ]
+    //     );
+    // }
+    public function selectedPage(Request $request)
+    {
+        $request->validate([
+            'page_id' => 'required',
+            'page_name' => 'required',
+            'page_access_token' => 'required',
+        ]);
+        $facebookAccount = FacebookAccount::where('user_id', 1)->first();
+
+        // Save selected page
+        $facebookAccount->update([
+            'page_id' => $request->page_id,
+            'page_name' => $request->page_name,
+            'page_access_token' => $request->page_access_token,
+        ]);
+
+        // Fetch posts for selected page
+        $response = Http::get(
+            "https://graph.facebook.com/v25.0/{$request->page_id}/posts",
+            [
+                'fields' => 'id,message,created_time',
+
+                'access_token' => $request->page_access_token,
+            ]
+        );
+
+        $postsData = $response->json();
+        return Inertia::render('User/Facebook/SelectPage');
+    }
+
     public function redirectToFacebook()
     {
-        
+
         $appId = env('FACEBOOK_APP_ID');
         $redirectUri = env('FACEBOOK_REDIRECT_URI');
         $state = csrf_token();
         session(['facebook_state' => $state]);
         $scope = implode(',', [
-            'email', 
+            'email',
             'public_profile',
             'pages_manage_posts',
             'pages_read_engagement',
             'pages_show_list',
             'pages_manage_engagement'
-            ]);
-           
-         $query = http_build_query([
-                'client_id' => $appId,
-                'redirect_uri' => $redirectUri,
-                'state' => $state,
-                'scope' => $scope,
-                'response_type' => 'code',
-                'auth_type' => 'rerequest',
-            ]);
+        ]);
+
+        $query = http_build_query([
+            'client_id' => $appId,
+            'redirect_uri' => $redirectUri,
+            'state' => $state,
+            'scope' => $scope,
+            'response_type' => 'code',
+            'auth_type' => 'rerequest',
+        ]);
         $facebookAuthUrl = "https://www.facebook.com/v25.0/dialog/oauth?$query";
         return redirect($facebookAuthUrl);
     }
@@ -116,7 +197,7 @@ class FacebookController extends Controller
             'fields' => 'id,name,email,picture',
             'access_token' => $accessToken,
         ]);
-        
+
 
         $userData = $userResponse->json();
 
@@ -136,7 +217,7 @@ class FacebookController extends Controller
         // return Inertia::render('User/Dashboard', [
         //     'facebookAccount' => $facebookAccount
         // ]);
-        return redirect()->route('facebook.connect');
+        return redirect()->route('facebook.connect')->with('success', 'Facebook connected successfully.');
     }
 
     // public function getFacebookPages()
@@ -158,65 +239,57 @@ class FacebookController extends Controller
     //     ]);
     // }
 
-    public function selectPage(Request $request)
+
+    public function publishPost(Request $request)
     {
         $request->validate([
-            'page_id' => 'required',
-            'page_name' => 'required',
-            'page_access_token' => 'required',
+            'message' => 'required|string',
+            'scheduled_at' => 'nullable|date',
         ]);
+
         $facebookAccount = FacebookAccount::where('user_id', 1)->first();
 
-        // Save selected page
-        $facebookAccount->update([
-            'page_id' => $request->page_id,
-            'page_name' => $request->page_name,
-            'page_access_token' => $request->page_access_token,
-        ]);
+        if (!$facebookAccount) {
 
-        // Fetch posts for selected page
-        $response = Http::get(
-            "https://graph.facebook.com/v25.0/{$request->page_id}/posts",
+            return back()->with('error', 'No Facebook account connected.');
+
+        }
+
+        // If user selected future time
+        if (
+            $request->scheduled_at &&
+            now()->lt($request->scheduled_at)
+        ) {
+
+            SchedulePost::create([
+
+                'user_id' => 1,
+
+                'facebook_account_id' => $facebookAccount->id,
+
+                'message' => $request->message,
+
+                'scheduled_at' => $request->scheduled_at,
+
+                'status' => 'pending',
+            ]);
+
+            return back()->with(
+                'success',
+                'Post scheduled successfully.'
+            );
+        }
+
+        // Otherwise publish immediately
+        $response = Http::post(
+            "https://graph.facebook.com/v25.0/{$facebookAccount->page_id}/feed",
             [
-                'fields' => 'id,message,created_time',
-
-                'access_token' => $request->page_access_token,
+                'message' => $request->message,
+                'access_token' => $facebookAccount->page_access_token,
             ]
         );
 
-        $postsData = $response->json();
-
-        return Inertia::render('User/Posts/List', [
-
-            'posts' => $postsData['data'] ?? [],
-
-            'selectedPage' => [
-                'id' => $request->page_id,
-                'name' => $request->page_name,
-            ]
-        ]);
-    }
-
-    public function publishPost(Request $request)
-{
-    $request->validate([
-        'message' => 'required|string',
-        'scheduled_at' => 'nullable|date',
-    ]);
-
-    $facebookAccount = FacebookAccount::where('user_id', 1)->first();
-
-    if (!$facebookAccount) {
-
-        return back()->with('error', 'No Facebook account connected.');
-
-    }
-
-    // If user selected future time
-    if (
-        $request->scheduled_at &&
-        now()->lt($request->scheduled_at)
-    ) {
+        $data = $response->json();
 
         SchedulePost::create([
 
@@ -226,46 +299,16 @@ class FacebookController extends Controller
 
             'message' => $request->message,
 
-            'scheduled_at' => $request->scheduled_at,
+            'published_at' => now(),
 
-            'status' => 'pending',
+            'status' => 'published',
+
+            'facebook_post_id' => $data['id'] ?? null,
         ]);
 
         return back()->with(
             'success',
-            'Post scheduled successfully.'
+            'Post published immediately.'
         );
     }
-
-    // Otherwise publish immediately
-    $response = Http::post(
-        "https://graph.facebook.com/v25.0/{$facebookAccount->page_id}/feed",
-        [
-            'message' => $request->message,
-            'access_token' => $facebookAccount->page_access_token,
-        ]
-    );
-
-    $data = $response->json();
-
-    SchedulePost::create([
-
-        'user_id' => 1,
-
-        'facebook_account_id' => $facebookAccount->id,
-
-        'message' => $request->message,
-
-        'published_at' => now(),
-
-        'status' => 'published',
-
-        'facebook_post_id' => $data['id'] ?? null,
-    ]);
-
-    return back()->with(
-        'success',
-        'Post published immediately.'
-    );
-}
 }

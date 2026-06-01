@@ -2,77 +2,18 @@
     <UserLayout>
         <div class="select-page-wrapper">
 
-            <div class="channel-card" v-if="facebookAccount">
-
-                <!-- Header -->
-                <div class="card-header">
-                    <h6 class="text-muted mb-1">Connected Account</h6>
-                    <span class="status-badge">● Connected</span>
-                </div>
-
-                <!-- Profile -->
-                <div class="profile d-flex align-items-center mt-3">
-
+            <!-- list of pages will be displayed here -->
+             <div v-for="page in pages" :key="page.id">
+                <div class="channel-card">
+                    <div class="card-header">
+                        <h3>{{ page.name }}</h3>
+                        <span class="status-badge">Active</span>
+                    </div>
                     <div class="avatar-ring">
-                        <img :src="facebookAccount.avatar" class="avatar" />
+                        <img :src="page.picture.data.url" alt="Avatar" class="avatar">
                     </div>
-
-                    <div class="ms-3 text-start">
-                        <h5 class="mb-1 fw-semibold">{{ facebookAccount.name }}</h5>
-                        <p class="text-muted small mb-0">
-                            {{ facebookAccount.email }}
-                        </p>
-                    </div>
-
+                    <hr>
                 </div>
-
-                <!-- Divider -->
-                <hr class="my-4" />
-
-                <!-- Action -->
-                <div class="text-start">
-                    <p class="text-muted small mb-2">
-                        You're connected and ready to manage your pages.
-                    </p>
-
-                    <button class="btn btn-primary">
-                        Change Account
-                    </button>
-                </div>
-
-            </div>
-
-
-            <div class="select-card" v-else>
-
-                <!-- Icon -->
-                <div class="icon">
-                    <!-- <i class="bi bi-facebook"></i> -->
-                    <i class="fa-brands fa-square-facebook"></i>
-                </div>
-
-                <!-- Title -->
-                <h2>Connect a Facebook Page</h2>
-
-                <!-- Subtitle -->
-                <p class="text-muted">
-                    Select a Facebook page to manage and schedule your posts.
-                </p>
-
-                <!-- CTA -->
-                <!-- <button class="btn btn-primary btn-lg w-100 mt-3" @click="selectPage">
-                    Continue with Facebook
-                    Connect Facebook
-                </button> -->
-                <a :href="route('facebook.redirect')" class="btn btn-primary btn-lg w-100 mt-3">
-                    Continue with Facebook
-                </a>
-
-                <!-- Extra info -->
-                <p class="small text-muted mt-3">
-                    You’ll be redirected to Facebook to choose a page and grant access.
-                </p>
-
             </div>
 
         </div>
@@ -85,12 +26,10 @@ import { onMounted } from 'vue';
 
 // Props
 const props = defineProps({
-    facebookAccount: Object,
     pages: Array,
 });
 
 onMounted(() => {
-    console.log('Facebook Account:', props.facebookAccount);
     console.log('Pages:', props.pages);
 });
 </script>
