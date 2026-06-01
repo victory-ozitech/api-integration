@@ -31,7 +31,7 @@ class FacebookController extends Controller
 
         $pagesData = $response->json();
 
-        return $pagesData;
+        // return $pagesData;
 
         if (isset($pagesData['error'])) {
             // Token expired, make them reconnect
@@ -39,7 +39,7 @@ class FacebookController extends Controller
             return redirect()->route('facebook.connect');
         }
 
-        return $facebookAccount;
+        // return $facebookAccount;
 
         return Inertia::render('User/Facebook/SelectPage', [
             'facebookAccount' => $facebookAccount,

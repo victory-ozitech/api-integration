@@ -6,7 +6,8 @@
 
                 <!-- Icon -->
                 <div class="icon">
-                    <i class="bi bi-facebook"></i>
+                    <!-- <i class="bi bi-facebook"></i> -->
+                     <i class="fa-brands fa-square-facebook"></i>
                 </div>
 
                 <!-- Title -->
@@ -39,12 +40,18 @@
 
 <script setup>
 import UserLayout from '@/Layouts/UserLayout.vue';
+import { onMounted } from 'vue';
 
 // Props
-// const props = defineProps({
-//     facebookAccount: Array,
-//     pages: Date
-// });
+const props = defineProps({
+    facebookAccount: Object,
+    pages: Array,
+});
+
+onMounted(() => {
+    console.log('Facebook Account:', props.facebookAccount);
+    console.log('Pages:', props.pages);
+});
 </script>
 
 <style scoped>
