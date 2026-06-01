@@ -38,17 +38,15 @@ class FacebookController extends Controller
             // return $pagesData;
 
             if (isset($pagesData['error'])) {
-            // Token expired, make them reconnect
-            $facebookAccount->delete();
-            return redirect()->route('facebook.connect');
-        }
-
-            // return $facebookAccount;
+                // Token expired, make them reconnect
+                $facebookAccount->delete();
+                return redirect()->route('facebook.connect');
+            }
 
             return Inertia::render('User/Facebook/ConnectPage', [
-            'facebookAccount' => $facebookAccount,
-            'pages' => $pagesData['data'] ?? [],
-        ]);
+                'facebookAccount' => $facebookAccount,
+                'pages' => $pagesData['data'] ?? [],
+            ]);
     }
 
     // public function connect()

@@ -1,7 +1,49 @@
 <template>
     <UserLayout>
+        <a
+            :href="route('facebook.redirect')"
+            class="facebook-connect-btn w-100 mt-3"
+        >
+            <i class="fa-brands fa-facebook"></i>
+            Connect Facebook Page
+        </a>
+
         <div class="select-page-wrapper">
-            <div class="channel-card" v-if="facebookAccount && Object.keys(facebookAccount).length > 0">
+            <template v-if="pages.length > 0">
+                <div class="channel-card" v-for="page in pages" :key="page.id">
+                    <div class="card-header">
+                        <h6 class="text-muted mb-1">{{ page.name }}</h6>
+                        <span class="status-badge">Page</span>
+                    </div>
+
+                    <div class="profile d-flex align-items-center mt-3">
+                        <div class="avatar-ring">
+                            <img
+                                :src="page.picture?.data?.url || ''"
+                                class="avatar"
+                            />
+                        </div>
+
+                        <div class="ms-3 text-start">
+                            <h5 class="mb-1 fw-semibold">
+                                {{ page.category || "Facebook Page" }}
+                            </h5>
+                            <p class="text-muted small mb-0">
+                                ID: {{ page.id }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <div
+                class="channel-card"
+                v-if="
+                    pages.length === 0 &&
+                    facebookAccount &&
+                    Object.keys(facebookAccount).length > 0
+                "
+            >
                 <!-- Header -->
                 <div class="card-header">
                     <h6 class="text-muted mb-1">Connected Account</h6>
@@ -11,15 +53,18 @@
                 <!-- Profile -->
                 <div class="profile d-flex align-items-center mt-3">
                     <div class="avatar-ring">
-                        <img :src="facebookAccount?.avatar || ''" class="avatar" />
+                        <img
+                            :src="facebookAccount?.avatar || ''"
+                            class="avatar"
+                        />
                     </div>
 
                     <div class="ms-3 text-start">
                         <h5 class="mb-1 fw-semibold">
-                            {{ facebookAccount?.name || 'Facebook User' }}
+                            {{ facebookAccount?.name || "Facebook User" }}
                         </h5>
                         <p class="text-muted small mb-0">
-                            {{ facebookAccount?.email || 'No email available' }}
+                            {{ facebookAccount?.email || "No email available" }}
                         </p>
                     </div>
                 </div>
@@ -35,40 +80,6 @@
 
                     <button class="btn btn-primary">Change Account</button>
                 </div>
-            </div>
-
-            <div class="select-card">
-                <!-- Icon -->
-                <div class="icon">
-                    <!-- <i class="bi bi-facebook"></i> -->
-                    <i class="fa-brands fa-square-facebook"></i>
-                </div>
-
-                <!-- Title -->
-                <h2>Connect a Facebook Page</h2>
-
-                <!-- Subtitle -->
-                <p class="text-muted">
-                    Select a Facebook page to manage and schedule your posts.
-                </p>
-
-                <!-- CTA -->
-                <!-- <button class="btn btn-primary btn-lg w-100 mt-3" @click="selectPage">
-                    Continue with Facebook
-                    Connect Facebook
-                </button> -->
-                <a
-                    :href="route('facebook.redirect')"
-                    class="btn btn-primary btn-lg w-100 mt-3"
-                >
-                    Connect Facebook Page
-                </a>
-
-                <!-- Extra info -->
-                <p class="small text-muted mt-3">
-                    You’ll be redirected to Facebook to choose a page and grant
-                    access.
-                </p>
             </div>
         </div>
     </UserLayout>
@@ -197,5 +208,35 @@ onMounted(() => {
 
 .btn-primary:hover {
     background: #166fe5;
+}
+
+.facebook-connect-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    background: #1877f2;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 14px;
+    padding: 14px 20px;
+    box-shadow: 0 14px 30px rgba(24, 119, 242, 0.18);
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+    max-width: 300px;
+    margin: 20px;
+}
+
+.facebook-connect-btn:hover {
+    background: #145bc5;
+    transform: translateY(-1px);
+    box-shadow: 0 18px 36px rgba(24, 119, 242, 0.24);
+}
+
+.facebook-connect-btn i {
+    font-size: 1.1rem;
 }
 </style>
