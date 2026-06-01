@@ -39,6 +39,12 @@
 
 <script setup>
 import UserLayout from '@/Layouts/UserLayout.vue';
+
+// Props
+const props = defineProps({
+    facebookAccount: Array,
+    pages: Date
+});
 </script>
 
 <style scoped>
