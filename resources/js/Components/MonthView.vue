@@ -119,7 +119,6 @@ const getPostsForDate = (date) => {
 const emit = defineEmits([
     "open-modal",
     "open-posts-modal",
-    "open-edit-modal",
 ]);
 
 const openModal = (date) => {
@@ -156,7 +155,7 @@ const openPostsModal = ({post, date}) => {
     padding: 2px 4px;
     cursor: pointer;
     @include mixin.dynamic-text(700, 11px, #0f172a, center);
-    margin-top: 7px;
+    margin-top: 2px;
     transition: all 0.18s ease;opacity: 0;
         visibility: hidden;
         transform: translateY(4px);
@@ -223,14 +222,12 @@ const openPostsModal = ({post, date}) => {
 }
 
 .date {
+    padding: 3px 9px;
     width: max-content;
-    padding: 8px 12px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #334155;
+    border-radius: 50%;
     /* background: #DFF5E7; */
     margin-bottom: 12px;
+    @include mixin.dynamic-text(700, 13px, #334155);
 }
 
 .date--today {

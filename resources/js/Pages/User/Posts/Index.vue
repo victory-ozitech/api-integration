@@ -4,9 +4,9 @@
             @formSubmit="handleFormSubmit" @closeModal="showModal = false" />
 
 
-        <ScheduledPostModal v-if="showScheduledPostsModal" :post="selectedPost"
-            :currentDate="currentDate" :selectedDate="selectedDateForModal" @closeModal="closeScheduledPostsModal"
-            @open-modal="handleOpenModal" @open-edit-modal="openEditModal" />
+        <ScheduledPostModal v-if="showScheduledPostsModal" :post="selectedPost" :currentDate="currentDate"
+            :selectedDate="selectedDateForModal" @closeModal="closeScheduledPostsModal" @open-modal="handleOpenModal"
+            @open-edit-modal="openEditModal" />
 
         <div class="container py-4">
 
@@ -29,7 +29,8 @@
 
             <div v-else>
                 <PostCalendar :posts="filteredPosts" :currentDate="currentDate" @open-modal="handleOpenModal"
-                    @open-edit-modal="openEditModal" @open-posts-modal="openScheduledPostsModal" />
+                    @open-edit-modal="openEditModal" @open-posts-modal="openScheduledPostsModal"
+                    v-model:currentDate="currentDate" />
             </div>
 
         </div>
@@ -43,7 +44,7 @@ import { router } from "@inertiajs/vue3";
 import PostList from "@components/PostList.vue";
 import PostCalendar from "@components/PostCalendar.vue";
 import ViewToggle from "@components/ViewToggle.vue";
-import { getPosts } from "@/utils/postUtils";
+import { getPosts, updatePost } from "@/utils/postUtils";
 import UserLayout from "@/Layouts/UserLayout.vue";
 import PostFormModal from "@/Components/PostFormModal.vue";
 import ScheduledPostModal from "@/Components/ScheduledPostModal.vue";
@@ -77,7 +78,7 @@ const handleOpenModal = (date) => {
     showScheduledPostsModal.value = false;
 };
 
-const openScheduledPostsModal = ({post, date}) => {
+const openScheduledPostsModal = ({ post, date }) => {
     selectedPost.value = post;
     selectedDateForModal.value = date;
     // console.log('Open Scheduled Posts Modal Date:', date, post);
@@ -91,13 +92,19 @@ const closeScheduledPostsModal = () => {
 
 const openEditModal = (post) => {
     selectedPost.value = post;
-    console.log('Post to be Edited: ', post);
-    
+    // console.log('Post to be Edited: ', post);
+
     showModal.value = true; // Open the modal
     showScheduledPostsModal.value = false;
 };
 
-const handleFormSubmit = () => {
+const handleFormSubmit = (formData) => {
+    updatePost(formData.id, formData);
+
+    // Refresh your local state if needed
+    // loadPosts();
+    router.get(route("posts.index"));
+
     showModal.value = false;
     selectedPost.value = null;
 };

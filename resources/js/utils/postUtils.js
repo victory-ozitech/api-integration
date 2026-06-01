@@ -72,6 +72,8 @@ export const getPosts = () => {
 };
 
 export const getPostById = (id) => {
+    if (!id) return null;
+
     const posts = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     const post = posts.find((p) => p.id === id);
 

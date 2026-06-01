@@ -45,7 +45,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 
 // Props
 const props = defineProps({
@@ -60,8 +60,37 @@ const props = defineProps({
     selectedDate: {
         type: [String, Date, null],
         required: true,
-    },
+    }, 
 });
+
+onMounted(() => {
+    if (!props.post) return;
+
+    content.value = props.post.content || '';
+    image.value = props.post.image || '';
+    scheduled_at.value = props.post.display_date
+        ? props.post.display_date.slice(0, 16)
+        : '';
+});
+
+watch(
+    () => props.post,
+    (post) => {
+        if (!post) return;
+
+        content.value = post.content || "";
+        image.value = post.image || "";
+        scheduled_at.value = post.display_date
+            ? post.display_date.slice(0, 16)
+            : "";
+    },
+    { immediate: true }
+);
+
+// Local  State
+const content = ref("");
+const image = ref("");
+const scheduled_at = ref("");
 
 // Emits
 const emit = defineEmits(["closeModal", "formSubmit"]);
@@ -73,8 +102,16 @@ const isEditMode = computed(() => {
 });
 
 // Utility Methods
+
 const submitForm = () => {
-    emit("formSubmit");
+    emit("formSubmit", {
+        id: props.post?.id,
+        content: content.value,
+        image: image.value,
+        scheduled_at: scheduled_at.value
+            ? new Date(scheduled_at.value).toISOString()
+            : null,
+    });
 
     closeModal();
 };

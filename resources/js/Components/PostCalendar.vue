@@ -5,7 +5,7 @@
                 <div class="navigation-group">
                     <button type="button" class="nav-btn" @click="prev"><i class="fa-solid fa-arrow-left"></i></button>
                     <button type="button" class="nav-btn" @click="next"><i class="fa-solid fa-arrow-right"></i></button>
-                    <button type="button" class="today-btn" @click="currentDate = new Date()">Today</button>
+                    <button type="button" class="today-btn" @click="goToToday">Today</button>
                 </div>
 
                 <div class="calendar-title">
@@ -84,7 +84,9 @@ const next = () => {
     if (view.value === "week") d.setDate(d.getDate() + 7);
     if (view.value === "day") d.setDate(d.getDate() + 1);
 
-    props.currentDate = d;
+    // props.currentDate = d;
+
+    emit("update:currentDate", d);
 };
 
 const prev = () => {
@@ -94,7 +96,13 @@ const prev = () => {
     if (view.value === "week") d.setDate(d.getDate() - 7);
     if (view.value === "day") d.setDate(d.getDate() - 1);
 
-    props.currentDate = d;
+    // props.currentDate = d;
+
+    emit("update:currentDate", d);
+};
+
+const goToToday = () => {
+    emit("update:currentDate", new Date());
 };
 
 // Formatting
@@ -133,6 +141,7 @@ const emit = defineEmits([
     "open-modal",
     "open-posts-modal",
     "open-edit-modal",
+    "update:currentDate",
 ]);
 
 const handleOpenModal = (date) => {

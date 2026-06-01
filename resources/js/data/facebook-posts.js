@@ -15,7 +15,7 @@ export const facebookPosts = {
             shares_count: 7,
             status: "published", // draft | scheduled | published
             scheduled_at: null,
-            created_at: "2026-05-28T09:30:00Z",
+            created_at: "2026-06-08T09:30:00Z",
             visibility: "public",
             liked: true,
         },
@@ -34,7 +34,7 @@ export const facebookPosts = {
             shares_count: 2,
             status: "scheduled", // draft | scheduled | published
             scheduled_at: "2026-06-29T16:10:00Z",
-            created_at: "2026-05-29T16:10:00Z",
+            created_at: "2026-06-09T16:10:00Z",
             visibility: "friends",
             liked: false,
         },
@@ -53,7 +53,7 @@ export const facebookPosts = {
             shares_count: 2,
             status: "published", // draft | scheduled | published
             scheduled_at: null,
-            created_at: "2026-05-29T16:10:00Z",
+            created_at: "2026-06-09T16:10:00Z",
             visibility: "friends",
             liked: false,
         },

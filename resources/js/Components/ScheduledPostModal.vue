@@ -214,7 +214,6 @@ const closeModal = () => {
 
 .premium-card {
     position: relative;
-    overflow: hidden;
 
     background:
         rgba(255, 255, 255, 0.72);
