@@ -29,8 +29,6 @@ return new class extends Migration
 
             $table->longText('access_token');
 
-            $table->timestamps();
-
             $table->unique([
                 'facebook_account_id',
                 'channel_id'
