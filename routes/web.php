@@ -22,6 +22,6 @@ Route::controller(FacebookController::class)->group(function () {
     Route::get('/auth/facebook', 'redirectToFacebook')->name('facebook.redirect');
     Route::get('/auth/facebook/callback', 'handleFacebookCallback')->name('facebook.callback');
     Route::get('/facebook/pages', 'pages')->name('facebook.page');
-    Route::post('/facebook/selected-pages', 'selectedPage')->name('facebook.selected-page');
-    Route::post('/facebook/selected-pages', 'publishPost')->name('facebook.publish-post');
+    Route::post('/facebook/publish/{post}', 'publishNow')->name('facebook.publish');
+    Route::post('/facebook/schedule-post', 'schedulePost')->name('facebook.schedule-post');
 });

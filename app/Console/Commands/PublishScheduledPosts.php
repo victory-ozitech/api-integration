@@ -33,7 +33,12 @@ class PublishScheduledPosts extends Command
 
         foreach ($posts as $post) {
 
-            PublishFacebookPostJob::dispatch($post);
+            dump("Publishing Post {$post->id}");
+
+            $post->update([
+                'status' => 'published',
+                'published_at' => now(),
+            ]);
 
         }
     }

@@ -14,10 +14,16 @@ class Channel extends Model
         'channel_name',
         'channel_description',
         'access_token',
+        'avatar'
     ];
 
     public function facebookAccount()
     {
         return $this->belongsTo(FacebookAccount::class);
+    }
+
+    public function postChannels()
+    {
+        return $this->hasMany(PostChannel::class);
     }
 }

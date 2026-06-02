@@ -8,16 +8,19 @@ class SchedulePost extends Model
 {
     protected $fillable = [
         'user_id',
-        'facebook_account_id',
         'message',
         'scheduled_at',
         'published_at',
         'status',
-        'facebook_post_id',
     ];
-
-    public function facebookAccount()
+    
+    public function channels()
     {
-        return $this->belongsTo(FacebookAccount::class);
+        return $this->hasMany(PostChannel::class);
+    }
+
+    public function media()
+    {
+        return $this->hasMany(PostMedia::class);
     }
 }

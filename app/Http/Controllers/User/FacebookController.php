@@ -5,7 +5,10 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Channel;
 use App\Models\FacebookAccount;
+use App\Models\PostChannel;
+use App\Models\PostMedia;
 use App\Models\SchedulePost;
+use App\Services\UploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
@@ -50,97 +53,6 @@ class FacebookController extends Controller
             ]);
     }
 
-    // public function connect()
-    // {
-    //     $facebookAccount = FacebookAccount::where('user_id', 1)->first();
-
-    //     return Inertia::render('User/Facebook/ConnectPage', [
-    //         'facebookAccount' => $facebookAccount,
-    //     ]);
-    // }
-
-    // public function pages()
-    // {
-    //     $facebookAccount = FacebookAccount::where('user_id', 1)->first();
-
-    //     if (!$facebookAccount) {
-
-    //         return redirect()
-    //             ->route('facebook.connect')
-    //             ->with(
-    //                 'error',
-    //                 'Please connect Facebook first.'
-    //             );
-    //     }
-
-    //     $response = Http::withoutVerifying()->get(
-    //         'https://graph.facebook.com/v25.0/me/accounts',
-    //         [
-    //             'access_token' => $facebookAccount->access_token,
-    //             'fields' => 'id,name,access_token,category,picture',
-    //         ]
-    //     );
-
-    //     $pagesData = $response->json();
-
-    //     if (isset($pagesData['error'])) {
-
-    //         return redirect()
-    //             ->route('facebook.connect')
-    //             ->with(
-    //                 'error',
-    //                 'Facebook session expired.'
-    //             );
-    //     }
-
-    //     return Inertia::render(
-    //         'User/Facebook/SelectPage',
-    //         [
-    //             'pages' => $pagesData['data'] ?? [],
-    //         ]
-    //     );
-    // }
-    // public function selectedPage(Request $request){
-    //     $request->validate([
-    //         'page_id' => 'required',
-    //         'page_name' => 'required',
-    //         'page_access_token' => 'required',
-    //     ]);
-    //     $facebookAccount = FacebookAccount::where('user_id', 1)->first();
-    //     if (!$facebookAccount) {
-    //         return back()->with(
-    //             'error',
-    //             'Please connect your Facebook account first.'
-    //         );
-    //     }
-
-    //     // Save selected page
-    //     Channel::updateOrCreate(
-    //         [
-    //             'channel_id' => $request->page_id,
-    //         ],
-    //         [
-    //             'user_id' => 1,
-    //             'facebook_account_id' => $facebookAccount->id,
-    //             'platform' => 'facebook',
-    //             'channel_name' => $request->page_name,
-    //             'access_token' => $request->page_access_token,
-    //         ]
-    //     );
-
-    //     // Fetch posts for selected page
-    //     $response = Http::get(
-    //         "https://graph.facebook.com/v25.0/{$request->page_id}/posts",
-    //         [
-    //             'fields' => 'id,message,created_time',
-
-    //             'access_token' => $request->page_access_token,
-    //         ]
-    //     );
-
-    //     $postsData = $response->json();
-    //     return Inertia::render('User/Facebook/SelectPage');
-    // }
     public function selectedPage(Request $request)
     {
         $channel = Channel::findOrFail($request->channel_id);
@@ -242,7 +154,7 @@ class FacebookController extends Controller
             'https://graph.facebook.com/v25.0/me/accounts',
             [
                 'access_token' => $accessToken,
-                'fields' => 'id,name,access_token',
+                'fields' => 'id,name,picture,access_token',
             ]
         );
         $pages = $pagesResponse->json()['data'] ?? [];
@@ -258,6 +170,7 @@ class FacebookController extends Controller
                     'platform' => 'facebook',
                     'channel_name' => $page['name'],
                     'access_token' => $page['access_token'],
+                    'avatar' => $page['picture']['data']['url'] ?? null,
                 ]
             );
         }
@@ -268,95 +181,94 @@ class FacebookController extends Controller
         return redirect()->route('facebook.connect')->with('success', 'Facebook connected successfully.');
     }
 
-    // public function getFacebookPages()
-    // {
-    //     $facebookAccount = FacebookAccount::where('user_id', 1)->first(); // Replace with actual authenticated user ID
-
-    //     if (!$facebookAccount) {
-    //         return response()->json(['error' => 'No Facebook account linked'], 404);
-    //     }
-
-    //     $response = Http::get('https://graph.facebook.com/v25.0/me/accounts', [
-    //         'access_token' => $facebookAccount->access_token,
-    //     ]);
-
-    //     $pagesData = $response->json();
-
-    //     return Inertia::render('User/Posts/Index', [
-    //         'pages' => $pagesData['data'] ?? []
-    //     ]);
-    // }
-
-
-    public function publishPost(Request $request)
+    public function schedulePost(Request $request)
     {
         $request->validate([
-            'message' => 'required|string',
+            'message' => 'nullable|string',
             'scheduled_at' => 'nullable|date',
+            'channels' => 'required|array|min:1',
+            'media.*' => 'nullable|file',
         ]);
 
-        $facebookAccount = FacebookAccount::where('user_id', 1)->first();
+        $post = SchedulePost::create([
+            'user_id' => 1,
+            'message' => $request->message,
+            'scheduled_at' => $request->scheduled_at,
+            'status' => $request->scheduled_at ? 'scheduled' : 'published',
+        ]);
 
-        if (!$facebookAccount) {
-
-            return back()->with('error', 'No Facebook account connected.');
-
-        }
-
-        // If user selected future time
-        if (
-            $request->scheduled_at &&
-            now()->lt($request->scheduled_at)
-        ) {
-
-            SchedulePost::create([
-
-                'user_id' => 1,
-
-                'facebook_account_id' => $facebookAccount->id,
-
-                'message' => $request->message,
-
-                'scheduled_at' => $request->scheduled_at,
-
-                'status' => 'pending',
+        foreach ($request->channels as $selectedChannel) {
+            $channel = Channel::find($selectedChannel['channel_id']);
+            if(!$channel) {
+                continue; // Skip if channel not found
+            }
+            PostChannel::create([
+                'schedule_post_id' => $post->id,
+                'channel_id' => $selectedChannel['channel_id'],
+                'platform' => 'facebook',
+                'status' => $request->scheduled_at ? 'pending' : 'published',
             ]);
-
-            return back()->with(
-                'success',
-                'Post scheduled successfully.'
-            );
         }
 
-        // Otherwise publish immediately
+        if ($request->hasFile('media')) {
+
+            $uploadedFiles = UploadService::upload(
+                $request->file('media'),
+                'posts'
+            );
+
+            foreach ($uploadedFiles as $file) {
+
+                PostMedia::create([
+                    'schedule_post_id' => $post->id,
+                    'file_path' => $file['file_path'],
+                    'file_name' => $file['file_name'],
+                    'mime_type' => $file['mime_type'],
+                    'file_size' => $file['file_size'],
+                ]);
+            }
+        }
+
+        return back()->with(
+        'success',
+        $request->scheduled_at
+            ? 'Post scheduled successfully.'
+            : 'Post created successfully.'
+    );
+    }
+
+    public function publishNow(Request $request)
+{
+    return 'test';
+    $request->validate([
+        'message' => 'required|string',
+        'channels' => 'required|array|min:1',
+    ]);
+
+    foreach ($request->channels as $selectedChannel) {
+
+        $channel = Channel::find($selectedChannel['channel_id']);
+
+        if (!$channel) {
+            continue;
+        }
+
         $response = Http::post(
-            "https://graph.facebook.com/v25.0/{$facebookAccount->page_id}/feed",
+            "https://graph.facebook.com/v25.0/{$channel->channel_id}/feed",
             [
                 'message' => $request->message,
-                'access_token' => $facebookAccount->page_access_token,
+                'access_token' => $channel->access_token,
             ]
         );
 
         $data = $response->json();
 
-        SchedulePost::create([
-
-            'user_id' => 1,
-
-            'facebook_account_id' => $facebookAccount->id,
-
-            'message' => $request->message,
-
-            'published_at' => now(),
-
-            'status' => 'published',
-
-            'facebook_post_id' => $data['id'] ?? null,
-        ]);
-
-        return back()->with(
-            'success',
-            'Post published immediately.'
-        );
+        logger()->info('Facebook Response', $data);
     }
+
+    return back()->with(
+        'success',
+        'Post published successfully.'
+    );
+}
 }

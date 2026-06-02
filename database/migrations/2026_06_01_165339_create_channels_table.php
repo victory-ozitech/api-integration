@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('channel_id');
 
             $table->string('channel_name');
+            $table->text('avatar')->nullable();
 
             $table->text('channel_description')
                 ->nullable();

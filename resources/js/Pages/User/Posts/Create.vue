@@ -33,7 +33,7 @@
                             grayscale: channel.status !== 'active',
                             active: isChannelSelected(channel.id)
                         }" @click="toggleChannel(channel)">
-                            <img :src="channel.avatar_url || '/assets/images/profile-img.png'"
+                            <img :src="channel.avatar || '/assets/images/profile-img.png'"
                                 :alt="channel.channel_name" />
                             <span class="social-icon">
                                 <i :class="getChannelIcon(channel.platform)"></i>
@@ -506,10 +506,10 @@ const submitForm = () => {
 
     console.groupEnd();
 
-    return;
+    // return; // Remove this line to enable actual submission
 
     router.post(
-        route('social-archive.post.store'),
+        route('facebook.publish'), // Adjust route name as needed
         formData,
         {
             forceFormData: true,

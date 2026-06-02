@@ -14,12 +14,10 @@ return new class extends Migration
         Schema::create('schedule_posts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('facebook_account_id')->constrained()->onDelete('cascade');
             $table->text('message');
             $table->timestamp('scheduled_at')->nullable();
+            $table->enum('status', ['draft', 'scheduled', 'published', 'publishing', 'failed'])->default('draft');
             $table->timestamp('published_at')->nullable();
-            $table->string('status')->default('draft');
-            $table->string('facebook_post_id')->nullable();
             $table->timestamps();
         });
     }
