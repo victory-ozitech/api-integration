@@ -100,47 +100,59 @@ class FacebookController extends Controller
     //         ]
     //     );
     // }
+    // public function selectedPage(Request $request){
+    //     $request->validate([
+    //         'page_id' => 'required',
+    //         'page_name' => 'required',
+    //         'page_access_token' => 'required',
+    //     ]);
+    //     $facebookAccount = FacebookAccount::where('user_id', 1)->first();
+    //     if (!$facebookAccount) {
+    //         return back()->with(
+    //             'error',
+    //             'Please connect your Facebook account first.'
+    //         );
+    //     }
+
+    //     // Save selected page
+    //     Channel::updateOrCreate(
+    //         [
+    //             'channel_id' => $request->page_id,
+    //         ],
+    //         [
+    //             'user_id' => 1,
+    //             'facebook_account_id' => $facebookAccount->id,
+    //             'platform' => 'facebook',
+    //             'channel_name' => $request->page_name,
+    //             'access_token' => $request->page_access_token,
+    //         ]
+    //     );
+
+    //     // Fetch posts for selected page
+    //     $response = Http::get(
+    //         "https://graph.facebook.com/v25.0/{$request->page_id}/posts",
+    //         [
+    //             'fields' => 'id,message,created_time',
+
+    //             'access_token' => $request->page_access_token,
+    //         ]
+    //     );
+
+    //     $postsData = $response->json();
+    //     return Inertia::render('User/Facebook/SelectPage');
+    // }
     public function selectedPage(Request $request)
     {
-        $request->validate([
-            'page_id' => 'required',
-            'page_name' => 'required',
-            'page_access_token' => 'required',
+        $channel = Channel::findOrFail($request->channel_id);
+
+        session([
+            'selected_channel_id' => $channel->id
         ]);
-        $facebookAccount = FacebookAccount::where('user_id', 1)->first();
-        if (!$facebookAccount) {
-            return back()->with(
-                'error',
-                'Please connect your Facebook account first.'
-            );
-        }
 
-        // Save selected page
-        Channel::updateOrCreate(
-            [
-                'channel_id' => $request->page_id,
-            ],
-            [
-                'user_id' => 1,
-                'facebook_account_id' => $facebookAccount->id,
-                'platform' => 'facebook',
-                'channel_name' => $request->page_name,
-                'access_token' => $request->page_access_token,
-            ]
+        return back()->with(
+            'success',
+            'Page selected successfully.'
         );
-
-        // Fetch posts for selected page
-        $response = Http::get(
-            "https://graph.facebook.com/v25.0/{$request->page_id}/posts",
-            [
-                'fields' => 'id,message,created_time',
-
-                'access_token' => $request->page_access_token,
-            ]
-        );
-
-        $postsData = $response->json();
-        return Inertia::render('User/Facebook/SelectPage');
     }
 
     public function redirectToFacebook()
@@ -213,7 +225,7 @@ class FacebookController extends Controller
 
         $userData = $userResponse->json();
 
-        FacebookAccount::updateOrCreate(
+        $facebookAccount = FacebookAccount::updateOrCreate(
             [
                 'facebook_id' => $userData['id']
             ],
@@ -225,6 +237,30 @@ class FacebookController extends Controller
                 'access_token' => $accessToken,
             ]
         );
+
+        $pagesResponse = Http::withoutVerifying()->get(
+            'https://graph.facebook.com/v25.0/me/accounts',
+            [
+                'access_token' => $accessToken,
+                'fields' => 'id,name,access_token',
+            ]
+        );
+        $pages = $pagesResponse->json()['data'] ?? [];
+        foreach ($pages as $page) {
+
+            Channel::updateOrCreate(
+                [
+                    'user_id' => 1,
+                    'channel_id' => $page['id'],
+                ],
+                [
+                    'facebook_account_id' => $facebookAccount->id,
+                    'platform' => 'facebook',
+                    'channel_name' => $page['name'],
+                    'access_token' => $page['access_token'],
+                ]
+            );
+        }
 
         // return Inertia::render('User/Dashboard', [
         //     'facebookAccount' => $facebookAccount
