@@ -1,8 +1,19 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { router } from "@inertiajs/vue3";
 import { createPost } from "@/utils/postUtils";
 import PostFormLayout from "@/Layouts/PostFormLayout.vue";
+
+const props = defineProps({
+    channels: {
+        type: Array,
+        required: true, 
+    }
+});
+
+onMounted(() => {
+    console.log("Available Channels:", props.channels);
+})
 
 const content = ref("");
 const image = ref("");
