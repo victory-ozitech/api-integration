@@ -16,13 +16,17 @@ class DashBoardController extends Controller
 
     public function index()
     {
-        return Inertia::render('User/Posts/Index');
+        $channels = Channel::where('user_id', 1)
+            ->get();
+        return Inertia::render('User/Posts/Index', [
+            'channels' => $channels
+        ]);
     }
 
     public function create()
     {
         $channels = Channel::where('user_id', 1)
-        ->get();
+            ->get();
         return Inertia::render('User/Posts/Create', [
             'channels' => $channels
         ]);
@@ -30,8 +34,11 @@ class DashBoardController extends Controller
 
     public function edit(string $id)
     {
+        $channels = Channel::where('user_id', 1)
+            ->get();
         return Inertia::render('User/Posts/Edit', [
-            'id' => $id
+            'id' => $id,
+            'channels' => $channels
         ]);
     }
 
