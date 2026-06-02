@@ -1,49 +1,46 @@
 <template>
     <UserLayout>
-        <a
-            :href="route('facebook.redirect')"
-            class="facebook-connect-btn w-100 mt-3"
-        >
+        <a :href="route('facebook.redirect')" class="facebook-connect-btn w-100 mt-3">
             <i class="fa-brands fa-facebook"></i>
             Connect Facebook Page
         </a>
 
         <div class="select-page-wrapper">
             <template v-if="pages.length > 0">
-                <div class="channel-card" v-for="page in pages" :key="page.id">
-                    <div class="card-header">
-                        <h6 class="text-muted mb-1">{{ page.name }}</h6>
-                        <span class="status-badge">Page</span>
-                    </div>
+                <div class="row">
+                    <div class="col-ll col-md-6 mb-4" v-for="page in pages" :key="page.id">
+                        <div class="channel-card">
+                            <div class="card-header">
+                                <h6 class="text-muted mb-1">{{ page.name }}</h6>
+                                <span class="status-badge">Page</span>
+                            </div>
 
-                    <div class="profile d-flex align-items-center mt-3">
-                        <div class="avatar-ring">
-                            <img
-                                :src="page.picture?.data?.url || ''"
-                                class="avatar"
-                            />
-                        </div>
+                            <div class="profile d-flex align-items-center mt-3">
+                                <div class="avatar-ring">
+                                    <img :src="page.picture?.data?.url || ''" class="avatar" />
+                                </div>
 
-                        <div class="ms-3 text-start">
-                            <h5 class="mb-1 fw-semibold">
-                                {{ page.category || "Facebook Page" }}
-                            </h5>
-                            <p class="text-muted small mb-0">
-                                ID: {{ page.id }}
-                            </p>
+                                <div class="ms-3 text-start">
+                                    <h5 class="mb-1 fw-semibold">
+                                        {{ page.category || "Facebook Page" }}
+                                    </h5>
+                                    <p class="text-muted small mb-0">
+                                        ID: {{ page.id }}
+                                    </p>
+                                </div>
+                            </div>
+
+                              <button class="btn btn-primary mt-4">Disconnect Account</button>
                         </div>
                     </div>
                 </div>
             </template>
 
-            <div
-                class="channel-card"
-                v-if="
-                    pages.length === 0 &&
-                    facebookAccount &&
-                    Object.keys(facebookAccount).length > 0
-                "
-            >
+            <div class="channel-card" v-if="
+                pages.length === 0 &&
+                facebookAccount &&
+                Object.keys(facebookAccount).length > 0
+            ">
                 <!-- Header -->
                 <div class="card-header">
                     <h6 class="text-muted mb-1">Connected Account</h6>
@@ -53,10 +50,7 @@
                 <!-- Profile -->
                 <div class="profile d-flex align-items-center mt-3">
                     <div class="avatar-ring">
-                        <img
-                            :src="facebookAccount?.avatar || ''"
-                            class="avatar"
-                        />
+                        <img :src="facebookAccount?.avatar || ''" class="avatar" />
                     </div>
 
                     <div class="ms-3 text-start">
