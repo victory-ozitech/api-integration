@@ -19,7 +19,7 @@
                             <img :src="formChannel.avatar || '/assets/images/profile-img.png'"
                                 :alt="formChannel.channel_name" />
                             <span class="social-icon">
-                                <i :class="getChannelIcon(formChannel.channel)"></i>
+                                <i :class="getChannelIcon(formChannel.platform)"></i>
                             </span>
                             <div class="selected-badge-edit">
                                 ✓
