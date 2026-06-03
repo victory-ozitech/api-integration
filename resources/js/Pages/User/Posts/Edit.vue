@@ -7,7 +7,7 @@
         </div>
 
         <!-- Card -->
-        <div class="create-card">
+        <div class="form-card">
             <form @submit.prevent.stop="submitForm">
 
                 <!-- Channels Form Group -->
@@ -16,7 +16,7 @@
                         <!-- Show only the selected channel if editing -->
                         <div class="profile-img active disabled"
                             :title="`This post is linked to ${formChannel.channel_name}. Channel cannot be changed.`">
-                            <img :src="formChannel.avatar_url || '/assets/images/profile-img.png'"
+                            <img :src="formChannel.avatar || '/assets/images/profile-img.png'"
                                 :alt="formChannel.channel_name" />
                             <span class="social-icon">
                                 <i :class="getChannelIcon(formChannel.channel)"></i>
@@ -183,8 +183,6 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
-import { router } from "@inertiajs/vue3";
-import { createPost } from "@/utils/postUtils";
 import PostFormLayout from "@/Layouts/PostFormLayout.vue";
 
 
@@ -193,7 +191,11 @@ const props = defineProps({
     channels: {
         type: Array,
         required: true,
-    }
+    },
+    post: {
+        type: Object,
+        default: null,
+    },
 });
 
 onMounted(() => {
@@ -203,10 +205,6 @@ onMounted(() => {
 
 
 //  ||============LOCAL STATE=================||
-const content = ref("");
-const image = ref("");
-const scheduled_at = ref("");
-
 const selectedOption = ref('publish_now');
 const selectedChannel = ref(null);
 const previewMedia = ref([]);
@@ -338,16 +336,6 @@ const removeMedia = (index) => {
     form.media.splice(index, 1);
 };
 
-const toggleChannel = (id) => {
-    const index = form.channels.indexOf(id);
-
-    if (index === -1) {
-        form.channels.push(id);
-    } else {
-        form.channels.splice(index, 1);
-    }
-};
-
 const getChannelIcon = (channel) => {
     switch (channel.toLowerCase()) {
         case 'facebook':
@@ -376,27 +364,7 @@ const getChannelIcon = (channel) => {
     }
 };
 
-// Check if channel is selected
-const isChannelSelected = (channelId) => {
-    return form.channels.some((c) => c.id === channelId);
-};
 
-// Clear all selections
-const clearSelection = () => {
-    form.channels = [];
-};
-
-const formatDate = (date) => {
-    if (!date) return '';
-
-    const d = new Date(date);
-
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-};
 
 const submitForm = () => {
     const selectedChannels = props.channels.filter((c) =>
@@ -449,6 +417,9 @@ const submitForm = () => {
 
     const formData = new FormData();
 
+    // Required for Laravel PUT uploads
+    formData.append('_method', 'PUT');
+
     formData.append('message', form.message);
     formData.append('scheduled_at', form.scheduled_at ?? '');
     formData.append(
@@ -458,33 +429,64 @@ const submitForm = () => {
     formData.append('status', form.status);
     formData.append('publish_option', form.publish_option);
 
-    // Channels
+    // Top-level channel info (required by backend update)
+    if (selectedChannels.length) {
+        formData.append(
+            'channel_id',
+            selectedChannels[0].id
+        );
+
+        formData.append(
+            'channel',
+            selectedChannels[0].channel_name
+        );
+    }
+
+    // Also send channels array
     selectedChannels.forEach((channel, index) => {
         formData.append(
             `channels[${index}][channel_id]`,
             channel.id
         );
+
         formData.append(
             `channels[${index}][channel]`,
             channel.channel_name
         );
     });
 
-    // Media
-    form.media.forEach((file, index) => {
-        formData.append(`media[${index}]`, file);
+    // Deleted media
+    if (deleted_media.value.length) {
+        deleted_media.value.forEach((media, index) => {
+            formData.append(
+                `deleted_media[${index}]`,
+                media.id || media.file_path
+            );
+        });
+    } else {
+        formData.append('deleted_media', '[]');
+    }
+
+    // Media handling
+    let hasNewFile = false;
+
+    form.media.forEach((media, index) => {
+        if (media instanceof File) {
+            hasNewFile = true;
+            formData.append(`media[${index}]`, media);
+        }
     });
 
-    // Optional deleted media support
-    deleted_media.value.forEach((media, index) => {
+    // Existing media only (no new uploads)
+    if (!hasNewFile) {
         formData.append(
-            `deleted_media[${index}]`,
-            media.id || media.file_path
+            'media',
+            JSON.stringify(form.media || [])
         );
-    });
+    }
 
     // DEBUG
-    console.group('🚀 FormData being sent');
+    console.group('🚀 Update FormData');
 
     for (const [key, value] of formData.entries()) {
         console.log(key, value);
@@ -492,20 +494,26 @@ const submitForm = () => {
 
     console.groupEnd();
 
-    return;
-
     router.post(
-        route('social-archive.post.store'),
+        route(
+            'social-archive.post.update',
+            props.post.id
+        ),
         formData,
         {
             forceFormData: true,
 
             onSuccess: () => {
-                console.log('✅ Created');
+                console.log(
+                    `✅ Updated post ${props.post.id}`
+                );
             },
 
             onError: (errors) => {
-                console.error('Failed to create post', errors);
+                console.error(
+                    `❌ Failed to update post ${props.post.id}`,
+                    errors
+                );
             },
         }
     );

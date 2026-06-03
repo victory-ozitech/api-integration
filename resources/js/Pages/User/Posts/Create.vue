@@ -7,7 +7,7 @@
         </div>
 
         <!-- Card -->
-        <div class="create-card">
+        <div class="form-card">
             <form @submit.prevent.stop="submitForm">
 
                 <!-- Channels Form Group -->
@@ -197,8 +197,6 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
-import { router } from "@inertiajs/vue3";
-import { createPost } from "@/utils/postUtils";
 import PostFormLayout from "@/Layouts/PostFormLayout.vue";
 
 
@@ -217,12 +215,7 @@ onMounted(() => {
 
 
 //  ||============LOCAL STATE=================||
-const content = ref("");
-const image = ref("");
-const scheduled_at = ref("");
-
 const selectedOption = ref('publish_now');
-const selectedChannel = ref(null);
 const previewMedia = ref([]);
 const deleted_media = ref([]);
 
@@ -252,14 +245,6 @@ const minDate = computed(() => {
     return today.toISOString().split('T')[0];
 });
 
-// formChannel
-const formChannel = computed(() => {
-    if (!form.channels?.length) return null;
-
-    const id = form.channels[0]; // assuming one selected channel
-
-    return props.channels.find(c => c.id === id) || null;
-});
 
 
 
@@ -400,17 +385,6 @@ const clearSelection = () => {
     form.channels = [];
 };
 
-const formatDate = (date) => {
-    if (!date) return '';
-
-    const d = new Date(date);
-
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-};
 
 const submitForm = () => {
     const selectedChannels = props.channels.filter((c) =>

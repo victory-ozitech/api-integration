@@ -36,6 +36,7 @@ import UserLayout from "@/Layouts/UserLayout.vue";
 }
 
 /* Card */
+.form-card,
 .create-card {
     background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(12px);
