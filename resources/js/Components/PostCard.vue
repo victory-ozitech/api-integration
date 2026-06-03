@@ -27,7 +27,7 @@ const formatDate = (date) => {
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
-    }).format(new Date(date));
+    }).format(new Date(date.replace(" ", "T")));
 };
 </script>
 
@@ -43,17 +43,17 @@ const formatDate = (date) => {
             <div class="user-block">
 
                 <div class="avatar-ring">
-                    <img :src="props.post.user_avatar" class="avatar" />
+                    <img :src="props.post.channels[0].channel.avatar" class="avatar" />
                 </div>
 
                 <div>
                     <div class="user-name">
-                        {{ props.post.user_name }}
+                        {{ props.post.channels[0].channel.channel_name }}
                     </div>
 
                     <div class="post-date">
                         <i class="fa-regular fa-clock"></i>
-                        {{ formatDate(props.post.created_at) }}
+                        <!-- {{ formatDate(props.post.scheduled_at ?? '') }} -->
                     </div>
                 </div>
 
@@ -67,13 +67,13 @@ const formatDate = (date) => {
 
         <!-- Content -->
         <div class="post-content">
-            {{ props.post.content }}
+            {{ props.post.message }}
         </div>
 
         <!-- Media -->
         <div class="media-shell">
 
-            <img v-if="props.post.image && !imageError" :src="props.post.image" class="post-image"
+            <img v-if="props.post.media[0].file_path && !imageError" :src="props.post.media[0].file_path" class="post-image"
                 @error="imageError = true" />
 
             <!-- Elegant Placeholder -->
@@ -108,17 +108,17 @@ const formatDate = (date) => {
 
                 <div class="stat-item">
                     <i class="fa-regular fa-heart"></i>
-                    <span>{{ props.post.likes_count }}</span>
+                    <span>{{ props.post.likes_count ?? 3 }}</span>
                 </div>
 
                 <div class="stat-item">
                     <i class="fa-regular fa-comment"></i>
-                    <span>{{ props.post.comments_count }}</span>
+                    <span>{{ props.post.comments_count ?? 3 }}</span>
                 </div>
 
                 <div class="stat-item">
                     <i class="fa-solid fa-retweet"></i>
-                    <span>{{ props.post.shares_count }}</span>
+                    <span>{{ props.post.shares_count ?? 3 }}</span>
                 </div>
 
             </div>

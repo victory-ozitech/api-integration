@@ -24,11 +24,11 @@
 
             <!-- Content -->
             <div v-if="view === 'list'">
-                <PostList :posts="filteredPosts" :currentDate="currentDate" @onLoadPosts="loadPosts" />
+                <PostList :posts="props.posts" :currentDate="currentDate" @onLoadPosts="loadPosts" />
             </div>
 
             <div v-else>
-                <PostCalendar :posts="filteredPosts" @open-modal="handleOpenModal" @open-edit-modal="openEditModal"
+                <PostCalendar :posts="props.posts" @open-modal="handleOpenModal" @open-edit-modal="openEditModal"
                     @open-posts-modal="openScheduledPostsModal" v-model:currentDate="currentDate" />
             </div>
 
@@ -54,11 +54,15 @@ const props = defineProps({
     channels: {
         type: Array,
         required: true,
+    },
+    posts: {
+        type: Array,
+        required: true,
     }
 });
 
 onMounted(() => {
-    posts.value = getPosts();
+    console.log("Posts", props.posts);
     console.log("Available Channels:", props.channels);
 });
 
@@ -68,7 +72,6 @@ onMounted(() => {
 //  ||============LOCAL STATE=================||
 const view = ref("calendar"); // list | calendar
 
-const posts = ref([]);
 const selectedPost = ref(null);
 
 const showModal = ref(false);
@@ -83,7 +86,7 @@ const selectedDateForModal = ref(null);
 
 //  ||============COMPUTED PROPERTIES=================||
 // Posts actual value is already in posts.value, so we can directly return it here. This allows us to easily add filters or sorting later if needed.
-const filteredPosts = computed(() => posts.value);
+// const filteredPosts = computed(() => props.posts);
 
 
 

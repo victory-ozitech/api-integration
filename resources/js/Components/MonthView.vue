@@ -1,31 +1,33 @@
 ﻿<template>
-    <div class="month-calendar">
-        <div class="calendar-weekdays">
-            <div v-for="label in weekdayLabels" :key="label" class="weekday-label">
-                {{ label }}
-            </div>
-        </div>
-
-        <div class="calendar-grid">
-            <div v-for="(day, i) in monthDays" :key="i" :class="['calendar-cell', { 'calendar-cell--outside': !day.isCurrentMonth, 'calendar-cell--today': isToday(day.date) }
-            ]">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div :class="['date', { 'date--today': isToday(day.date), 'date--outside': !day.isCurrentMonth }]">
-                        {{ day.date.getDate() }}
-                    </div>
-
-                    <button v-if="isFutureOrToday(day.date)" class="add-btn" @click.stop="openModal(day.date)"
-                        title="Schedule New Post">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
+    <div class="calendar-scroll">
+        <div class="month-calendar">
+            <div class="calendar-weekdays">
+                <div v-for="label in weekdayLabels" :key="label" class="weekday-label">
+                    {{ label }}
                 </div>
-
-                <transition-group name="fade" tag="div" class="event-list">
-                    <div v-for="post in getPostsForDate(day.date)" :key="post.id" :title="post.content"
-                        class="post-pill" @click.stop="openPostsModal({post, date: day.date})">
-                        {{ post.content.slice(0, 30) }}
+            </div>
+    
+            <div class="calendar-grid">
+                <div v-for="(day, i) in monthDays" :key="i" :class="['calendar-cell', { 'calendar-cell--outside': !day.isCurrentMonth, 'calendar-cell--today': isToday(day.date) }
+                ]">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div :class="['date', { 'date--today': isToday(day.date), 'date--outside': !day.isCurrentMonth }]">
+                            {{ day.date.getDate() }}
+                        </div>
+    
+                        <button v-if="isFutureOrToday(day.date)" class="add-btn" @click.stop="openModal(day.date)"
+                            title="Schedule New Post">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
                     </div>
-                </transition-group>
+    
+                    <transition-group name="fade" tag="div" class="event-list">
+                        <div v-for="post in getPostsForDate(day.date)" :key="post.id" :title="post.content"
+                            class="post-pill" @click.stop="openPostsModal({post, date: day.date})">
+                            {{ post.message.slice(0, 30) }}
+                        </div>
+                    </transition-group>
+                </div>
             </div>
         </div>
     </div>
@@ -168,10 +170,17 @@ const openPostsModal = ({post, date}) => {
 @use "@sass/mixins.scss" as mixin;
 @use "@sass/variables.scss" as *;
 
+.calendar-scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
 .month-calendar {
     display: flex;
     flex-direction: column;
     gap: 14px;
+    min-width: 900px;
 }
 
 .add-btn {

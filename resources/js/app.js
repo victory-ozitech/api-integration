@@ -38,6 +38,10 @@ createInertiaApp({
             .component("Head", Head)
             .mount(el);
 
+        // Make Inertia router available globally
+        vueApp.config.globalProperties.$router = router;
+        window.router = router;
+
         // 🧠 Set document.title from Laravel's props.title if available
         router.on("navigate", () => {
             const titleFromProps =

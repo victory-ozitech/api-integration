@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\User\DashBoardController;
-use App\Http\Controllers\User\FacebookController;
+use App\Http\Controllers\Facebook\FacebookAuthController;
+use App\Http\Controllers\Facebook\FacebookPostController;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -17,11 +18,18 @@ Route::controller(DashBoardController::class)->group(function () {
     Route::get('/{id}/edit', 'edit')->name('posts.edit');
 });
 
-Route::controller(FacebookController::class)->group(function () {
+// Facebook Auth
+Route::controller(FacebookAuthController::class)->group(function () {
     Route::get('/connect-facebook', 'connect')->name('facebook.connect');
     Route::get('/auth/facebook', 'redirectToFacebook')->name('facebook.redirect');
-    Route::get('/auth/facebook/callback', 'handleFacebookCallback')->name('facebook.callback');
-    Route::get('/facebook/pages', 'pages')->name('facebook.page');
-    Route::post('/facebook/publish/{post}', 'publishNow')->name('facebook.publish');
-    Route::post('/facebook/schedule-post', 'schedulePost')->name('facebook.schedule-post');
+    Route::get('/auth/facebook/callback', 'handleCallback')->name('facebook.callback');
+    Route::post('/auth/facebook/select-page', 'selectedPage')->name('facebook.select-page');
+});
+
+// Posts
+Route::controller(FacebookPostController::class)->group(function () {
+    Route::get('/posts', 'index')->name('posts.index');
+    Route::post('/posts', 'store')->name('posts.store');
+    Route::put('/posts/{post}', 'update')->name('posts.update');
+    Route::delete('/posts/{post}', 'destroy')->name('posts.destroy');
 });

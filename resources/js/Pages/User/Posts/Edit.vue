@@ -15,11 +15,12 @@
                     <div class="social-media-profile-cont">
                         <!-- Show only the selected channel if editing -->
                         <div class="profile-img active disabled"
-                            :title="`This post is linked to ${formChannel.channel_name}. Channel cannot be changed.`">
-                            <img :src="formChannel.avatar || '/assets/images/profile-img.png'"
-                                :alt="formChannel.channel_name" />
+                            :title="`This post is linked to ${formChannel?.channel_name || 
+                            'Unknown Channel'}. Channel cannot be changed.`">
+                            <img :src="formChannel?.avatar || '/assets/images/profile-img.png'"
+                                :alt="formChannel?.channel_name || 'Channel Avatar'" />
                             <span class="social-icon">
-                                <i :class="getChannelIcon(formChannel.platform)"></i>
+                                <i :class="getChannelIcon(formChannel?.platform || 'facebook')"></i>
                             </span>
                             <div class="selected-badge-edit">
                                 ✓
@@ -215,15 +216,19 @@ const deleted_media = ref([]);
 
 //  ||============REACTIVE FORM=================||
 const form = reactive({
-    message: "",
-    date: '',
-    time: "09:00",
-    channels: [],
-    media: [],
-    is_scheduled: false,
-    scheduled_at: null,
-    publish_option: "now",
-    status: "draft",
+    message: props.post?.message || "",
+    date: props.post?.scheduled_at
+        ? props.post.scheduled_at.split(' ')[0]
+        : '',
+    time: props.post?.scheduled_at
+        ? props.post.scheduled_at.split(' ')[1]
+        : "09:00",
+    channels: props.post?.channels || [],
+    media: props.post?.media || [],
+    is_scheduled: props.post?.is_scheduled || false,
+    scheduled_at: props.post?.scheduled_at || null,
+    publish_option: props.post?.publish_option || "now",
+    status: props.post?.status || "draft",
 });
 
 
@@ -496,7 +501,7 @@ const submitForm = () => {
 
     router.post(
         route(
-            'social-archive.post.update',
+            'posts.update',
             props.post.id
         ),
         formData,

@@ -197,6 +197,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
+import { router } from "@inertiajs/vue3";
 import PostFormLayout from "@/Layouts/PostFormLayout.vue";
 
 
@@ -399,7 +400,7 @@ const submitForm = () => {
         alert('Please select a channel first!');
         return;
     }
-
+    
     if (!selectedOption.value) {
         alert(
             'Please choose a scheduling option (Publish Now or Custom Time).'
@@ -483,7 +484,7 @@ const submitForm = () => {
     // return; // Remove this line to enable actual submission
 
     router.post(
-        route('facebook.publish'), // Adjust route name as needed
+        route('posts.store'), // Adjust route name as needed
         formData,
         {
             forceFormData: true,
