@@ -253,6 +253,8 @@ const props = defineProps({
 
 onMounted(() => {
     console.log("Available Channels:", props.channels);
+
+    resetForm();
 })
 
 
@@ -501,6 +503,34 @@ const getPreviewComponent = (channelName) => {
 };
 
 
+// ======================================================
+// Reset Helpers
+// ======================================================
+const getBlankForm = () => ({
+    message: '',
+    date: '',
+    time: '09:00',
+    channels: [],
+    media: [],
+    is_scheduled: false,
+    scheduled_at: null,
+    publish_option: 'now',
+    status: 'draft',
+    id: null,
+    group_id: null,
+    is_grouped: false,
+    posts: [],
+});
+
+const resetForm = () => {
+    Object.assign(form, getBlankForm());
+
+    selectedOption.value = 'publish_now';
+    previewMedia.value = [];
+    deleted_media.value = [];
+};
+
+
 const submitForm = () => {
     const selectedChannels = props.channels.filter((c) =>
         form.channels.some((sel) =>
@@ -605,6 +635,8 @@ const submitForm = () => {
 
             onSuccess: () => {
                 console.log('✅ Created');
+
+                resetForm();
             },
 
             onError: (errors) => {

@@ -348,12 +348,7 @@ const closeModal = () => {
 
         margin-bottom: 18px;
 
-        @media (min-width: 768px) and (max-width: 1250px) {
-            gap: 10px;
-            flex-direction: column;
-        }
-
-        @media (max-width: 400px) {
+        @media (max-width: 350px) {
             gap: 10px;
             flex-direction: column;
         }
@@ -362,6 +357,7 @@ const closeModal = () => {
             display: flex;
             align-items: center;
             gap: 14px;
+            flex-direction: column;
 
             .channels-stack {
                 display: flex;

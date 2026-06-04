@@ -504,6 +504,37 @@ const getPreviewComponent = (channelName) => {
 };
 
 
+// ======================================================
+// Reset Helpers
+// ======================================================
+const getBlankForm = () => ({
+    message: '',
+    date: props.post?.scheduled_at
+        ? props.post.scheduled_at.split(' ')[0]
+        : '',
+    time: '09:00',
+    channels: [],
+    media: [],
+    is_scheduled: false,
+    scheduled_at: null,
+    publish_option: 'now',
+    status: 'draft',
+    id: null,
+    group_id: null,
+    is_grouped: false,
+    posts: [],
+});
+
+const resetForm = () => {
+    Object.assign(form, getBlankForm());
+
+    selectedOption.value = 'publish_now';
+    selectedChannel.value = null;
+    previewMedia.value = [];
+    deleted_media.value = [];
+};
+
+
 
 const submitForm = () => {
     const selectedChannels = props.post.channels.filter((c) =>
@@ -643,9 +674,9 @@ const submitForm = () => {
             forceFormData: true,
 
             onSuccess: () => {
-                console.log(
-                    `✅ Updated post ${props.post.id}`
-                );
+                console.log(`✅ Updated post ${props.post.id}`);
+
+                resetForm();
             },
 
             onError: (errors) => {
