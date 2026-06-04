@@ -83,10 +83,11 @@
                     <div v-if="form.media?.length" class="media-section">
                         <h5>Media</h5>
                         <div class="media-grid">
-                            <div v-for="media in form.media" :key="media.url" class="media-item"
-                                @click.stop="openMedia(media.url)">
+                            <div v-for="media in form.media" :key="media.file_path" class="media-item"
+                                @click.stop="openMedia(media.file_path)">
                                 <img v-if="isImage(media)" :src="getMediaUrl(media)"
-                                    :alt="media.original_name || media.name || 'Uploaded image'" />
+                                    :alt="media.original_name || media.name || 'Uploaded image'"
+                                    @error="e => console.log('Image failed:', e.target.src)" />
                                 <div v-else-if="isVideo(media)" class="video-placeholder">
                                     🎥 Video
                                 </div>
@@ -189,10 +190,6 @@ import PostFormLayout from "@/Layouts/PostFormLayout.vue";
 
 //  ||============PROPS=================||
 const props = defineProps({
-    channels: {
-        type: Array,
-        required: true,
-    },
     post: {
         type: Object,
         default: null,
@@ -200,7 +197,6 @@ const props = defineProps({
 });
 
 onMounted(() => {
-    console.log("Available Channels:", props.channels);
     console.log("Post Prop:", props.post);
 })
 
@@ -248,7 +244,7 @@ const formChannel = computed(() => {
 
     const id = form.channels[0]; // assuming one selected channel
 
-    return props.channels.find(c => c.id === id) || null;
+    return props.post.channels.find(c => c.id === id) || null;
 });
 
 
@@ -267,7 +263,12 @@ const isVideo = (media) => {
 
 const getMediaUrl = (media) => {
     try {
-        if (media.url) return media.url;
+        // if (media.file_path) return media.file_path;
+        if (media.file_path) {
+            return media.file_path.startsWith('/')
+                ? media.file_path
+                : `/${media.file_path}`;
+        }
 
         if (typeof File !== 'undefined' && media instanceof File) {
             return URL.createObjectURL(media);
@@ -373,7 +374,7 @@ const getChannelIcon = (channel) => {
 
 
 const submitForm = () => {
-    const selectedChannels = props.channels.filter((c) =>
+    const selectedChannels = props.post.channels.filter((c) =>
         form.channels.some((sel) =>
             typeof sel === 'object'
                 ? sel.id === c.id

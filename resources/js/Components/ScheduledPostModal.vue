@@ -3,7 +3,6 @@
         <div class="modal-content">
             <!-- Modal Header -->
 
-
             <div class="premium-card">
 
                 <!-- Glow -->
@@ -15,44 +14,38 @@
                     <div class="user-block">
 
                         <div class="avatar-ring">
-                            <img :src="post.user_avatar" class="avatar" />
+                            <img :src="props.post.channels[0].channel.avatar" class="avatar" />
                         </div>
 
                         <div>
                             <div class="user-name">
-                                {{ post.user_name }}
+                                {{ props.post.channels[0].channel.channel_name }}
                             </div>
 
                             <div class="post-date">
                                 <i class="fa-regular fa-clock"></i>
-                                {{ formatDate(post.created_at) }}
+                                {{ formatDate(props.post.scheduled_at ?? '') }}
                             </div>
                         </div>
 
                     </div>
 
-                    <div class="d-flex gap-2">
-                        <div class="status-pill" :class="post.status">
-                            {{ post.status }}
-                        </div>
-
-                        <button class="close-btn" @click="closeModal">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <div class="status-pill" :class="props.post.status">
+                        {{ props.post.status }}
                     </div>
 
                 </div>
 
                 <!-- Content -->
                 <div class="post-content">
-                    {{ post.content }}
+                    {{ props.post.message }}
                 </div>
 
                 <!-- Media -->
                 <div class="media-shell">
 
-                    <img v-if="post.image && !imageError" :src="post.image" class="post-image"
-                        @error="imageError = true" />
+                    <img v-if="props.post.media[0].file_path && !imageError" :src="props.post.media[0].file_path"
+                        class="post-image" @error="imageError = true" />
 
                     <!-- Elegant Placeholder -->
                     <div v-else class="image-placeholder">
@@ -86,17 +79,17 @@
 
                         <div class="stat-item">
                             <i class="fa-regular fa-heart"></i>
-                            <span>{{ post.likes_count }}</span>
+                            <span>{{ props.post.likes_count ?? 3 }}</span>
                         </div>
 
                         <div class="stat-item">
                             <i class="fa-regular fa-comment"></i>
-                            <span>{{ post.comments_count }}</span>
+                            <span>{{ props.post.comments_count ?? 3 }}</span>
                         </div>
 
                         <div class="stat-item">
                             <i class="fa-solid fa-retweet"></i>
-                            <span>{{ post.shares_count }}</span>
+                            <span>{{ props.post.shares_count ?? 3 }}</span>
                         </div>
 
                     </div>
@@ -130,9 +123,6 @@ const props = defineProps({
         type: Date,
         default: '',
         required: true,
-        // type: Object,
-        // default: () => { },
-        // required: true,
     },
 });
 
@@ -141,13 +131,20 @@ const imageError = ref(false);
 
 
 // Utility Methods
+
 const formatDate = (date) => {
+    if (!date) return "Not scheduled";
+
+    const parsedDate = new Date(date.replace(" ", "T"));
+
+    if (isNaN(parsedDate.getTime())) return "Invalid date";
+
     return new Intl.DateTimeFormat("en-US", {
         month: "short",
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
-    }).format(new Date(date));
+    }).format(parsedDate);
 };
 
 // Emit

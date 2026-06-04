@@ -131,7 +131,13 @@ export default {
         },
         getMediaUrl(media) {
             try {
-                if (media.url) return media.url;
+                // if (media.file_path) return media.file_path;
+                if (media.file_path) {
+                    return media.file_path.startsWith('/')
+                        ? media.file_path
+                        : `/${media.file_path}`;
+                }
+                
                 if (typeof File !== "undefined" && media instanceof File) {
                     return URL.createObjectURL(media);
                 }

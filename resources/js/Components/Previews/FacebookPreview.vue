@@ -23,34 +23,34 @@
 
             <div class="post-content">
                 <div class="text-content">
-                    <p class="post-text">{{ form.message || 'Your post text will appear here...' }}</p>
+                    <p class="post-text">{{ props.form.message || 'Your post text will appear here...' }}</p>
                 </div>
 
                 <div class="image-preview">
                     <!-- If no media -->
-                    <div v-if="!form.media || form.media?.length === 0" class="default-preview">
+                    <div v-if="!props.form.media || props.form.media?.length === 0" class="default-preview">
                         <div class="img-cont">
                             <img :src="'/assets/images/camera-img.png'" alt="Default" />
                         </div>
                     </div>
-                    <template v-if="form.media?.length && form.media?.every(isImage)">
+                    <template v-if="props.form.media?.length && props.form.media?.every(isImage)">
                         <!-- If multiple images -->
-                        <div v-if="form.media?.length" class="media-grid">
-                            <template v-if="form.media.length === 1">
-                                <img :src="getMediaUrl(form.media[0])" class="single-media" />
+                        <div v-if="props.form.media?.length" class="media-grid">
+                            <template v-if="props.form.media.length === 1">
+                                <img :src="getMediaUrl(props.form.media[0])" class="single-media" />
                             </template>
 
-                            <template v-else-if="form.media.length === 2">
+                            <template v-else-if="props.form.media.length === 2">
                                 <div class="two-grid">
-                                    <img v-for="(file, i) in form.media" :key="i" :src="getMediaUrl(file)" />
+                                    <img v-for="(file, i) in props.form.media" :key="i" :src="getMediaUrl(file)" />
                                 </div>
                             </template>
 
-                            <template v-else-if="form.media.length === 3">
+                            <template v-else-if="props.form.media.length === 3">
                                 <div class="three-grid">
-                                    <img :src="getMediaUrl(form.media[0])" class="large" />
+                                    <img :src="getMediaUrl(props.form.media[0])" class="large" />
                                     <div class="two-small">
-                                        <img v-for="(file, i) in form.media.slice(1)" :key="i"
+                                        <img v-for="(file, i) in props.form.media.slice(1)" :key="i"
                                             :src="getMediaUrl(file)" />
                                     </div>
                                 </div>
@@ -58,16 +58,16 @@
 
                             <template v-else>
                                 <div class="four-grid">
-                                    <img v-for="(file, i) in form.media.slice(0, 4)" :key="i"
+                                    <img v-for="(file, i) in props.form.media.slice(0, 4)" :key="i"
                                         :src="getMediaUrl(file)" />
-                                    <div v-if="form.media.length > 4" class="overlay">+{{ form.media.length - 4 }}</div>
+                                    <div v-if="props.form.media.length > 4" class="overlay">+{{ props.form.media.length - 4 }}</div>
                                 </div>
                             </template>
                         </div>
                     </template>
-                    <template v-else-if="form.media?.length && form.media?.every(isVideo)">
-                        <template v-if="form.media?.length">
-                            <template v-for="media in form.media" :key="media.url">
+                    <template v-else-if="props.form.media?.length && props.form.media?.every(isVideo)">
+                        <template v-if="props.form.media?.length">
+                            <template v-for="media in props.form.media" :key="media.url">
                                 <!-- If video -->
                                 <div v-if="isVideo(media)">
                                     <video class="w-100 rounded" controls>
@@ -110,34 +110,55 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        form: { type: Object, required: true },
-        channel: { type: Object, required: true },
-        selectedChannels: { type: Array, default: () => [] },
+<script setup>
+import { onMounted } from "vue";
+
+const props = defineProps({
+    form: {
+        type: Object,
+        required: true,
     },
-    methods: {
-        isImage(media) {
-            const type = media?.mime_type || media?.type || '';
-            return type.includes('image');
-        },
-        isVideo(media) {
-            const type = media?.mime_type || media?.type || '';
-            return type.includes('video');
-        },
-        getMediaUrl(media) {
-            try {
-                if (media.url) return media.url;
-                if (typeof File !== "undefined" && media instanceof File) {
-                    return URL.createObjectURL(media);
-                }
-            } catch (e) {
-                console.warn("Error getting media URL:", e);
-            }
-            return "";
-        },
+    channel: {
+        type: Object,
+        required: true,
+    },
+    selectedChannels: {
+        type: Array,
+        default: () => [],
+    },
+});
+
+onMounted(() => {
+    // console.log("channel:", props.channel);
+    // console.log("Selected channels:", props.selectedChannels);
+})
+
+const isImage = (media) => {
+    const type = media?.mime_type || media?.type || '';
+    return type.includes('image');
+};
+
+const isVideo = (media) => {
+    const type = media?.mime_type || media?.type || '';
+    return type.includes('video');
+};
+
+const getMediaUrl = (media) => {
+    try {
+        if (media.file_path) {
+            return media.file_path.startsWith('/')
+                ? media.file_path
+                : `/${media.file_path}`;
+        }
+
+        if (typeof File !== 'undefined' && media instanceof File) {
+            return URL.createObjectURL(media);
+        }
+    } catch (e) {
+        console.warn('Error getting media URL:', e);
     }
+
+    return '';
 };
 </script>
 

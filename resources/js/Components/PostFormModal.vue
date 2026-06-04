@@ -30,11 +30,12 @@
                                     <div class="social-media-profile-cont">
                                         <!-- Show only the selected channel if editing -->
                                         <div v-if="isEditMode && formChannel" class="profile-img active disabled"
-                                            :title="`This post is linked to ${formChannel.channel_name}. Channel cannot be changed.`">
+                                            :title="`This post is linked to ${formChannel.channel_name ||
+                                                'Unknown Channel'}. Channel cannot be changed.`">
                                             <img :src="formChannel.avatar || '/assets/images/profile-img.png'"
-                                                :alt="formChannel.channel_name" />
+                                                :alt="formChannel.channel_name || 'Channel Avatar'" />
                                             <span class="social-icon">
-                                                <i :class="getChannelIcon(formChannel.platform)"></i>
+                                                <i :class="getChannelIcon(formChannel.platform || 'facebook')"></i>
                                             </span>
                                             <div class="selected-badge-edit">
                                                 ✓
@@ -61,6 +62,7 @@
                                         </template>
                                     </div>
                                 </div>
+
                                 <!-- Media Upload Form Group -->
                                 <div class="form-group">
                                     <div class="label">Media</div>
@@ -115,10 +117,11 @@
                                     <div v-if="form.media?.length" class="media-section">
                                         <h5>Media</h5>
                                         <div class="media-grid">
-                                            <div v-for="media in form.media" :key="media.url" class="media-item"
-                                                @click.stop="openMedia(media.url)">
+                                            <div v-for="media in form.media" :key="media.file_path" class="media-item"
+                                                @click.stop="openMedia(media.file_path)">
                                                 <img v-if="isImage(media)" :src="getMediaUrl(media)"
-                                                    :alt="media.original_name || media.name || 'Uploaded image'" />
+                                                    :alt="media.original_name || media.name || 'Uploaded image'"
+                                                    @error="e => console.log('Image failed:', e.target.src)" />
                                                 <div v-else-if="isVideo(media)" class="video-placeholder">
                                                     🎥 Video
                                                 </div>
@@ -140,22 +143,15 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <!-- Message Form Group -->
                                 <div class="form-group">
                                     <label for="message">Post message</label>
-                                    <textarea name="message" rows="2" id="message" v-model="form.message"
+                                    <textarea name="message" rows="3" id="message" v-model="form.message"
                                         placeholder="Enter post message" class="form-control border-dark"
                                         required></textarea>
                                 </div>
-                                <!-- Channels Form Group -->
-                                <!-- <div class="form-group">
-                                    <label for="platform">Channels</label>
-                                    <select v-model="form.channels" multiple required :disabled="isEditMode">
-                                        <option v-for="c in availableChannels" :key="c.id" :value="c.id">
-                                            {{ c.channel }}
-                                        </option>
-                                    </select>
-                                </div> -->
+
                                 <!-- Scheduling Options Form Group -->
                                 <div class="form-group">
                                     <div class="label m-0">
@@ -220,6 +216,8 @@
 
                                     </div>
                                 </div>
+
+                                <!-- Actions -->
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-primary">
                                         {{ isEditMode ? "Update" : "Create" }}
@@ -234,7 +232,7 @@
                     <div v-if="activePreviewChannel" class="col-md-4">
                         <div class="right-col">
                             <div class="preview-card">
-                                <component :is="getPreviewComponent(activePreviewChannel.channel)" :form="form"
+                                <component :is="getPreviewComponent(activePreviewChannel.platform)" :form="form"
                                     :channel="activePreviewChannel" :selected-channels="selectedPreviewChannels" />
 
                                 <!-- Channel Selection Info -->
@@ -314,84 +312,6 @@ const emit = defineEmits(['closeModal', 'formSubmit']);
 
 
 // ======================================================
-// State
-// ======================================================
-
-const selectedOption = ref('publish_now');
-
-const selectedChannel = ref(null);
-
-const previewMedia = ref([]);
-
-const deleted_media = ref([]);
-
-const form = reactive({
-    message: '',
-    date: '',
-    time: '09:00',
-    channels: [],
-    media: [],
-    is_scheduled: false,
-    scheduled_at: null,
-    publish_option: 'now',
-    status: 'draft',
-});
-
-
-// ======================================================
-// Computed
-// ======================================================
-
-const minDate = computed(() => {
-    const today = new Date();
-
-    return today.toISOString().split('T')[0];
-});
-
-const isEditMode = computed(() => {
-    return !!props.post;
-});
-
-const formChannel = computed(() => {
-    if (!form.channels?.length) return null;
-
-    const id = form.channels[0]; // assuming one selected channel
-
-    return props.channels.find(c => c.id === id) || null;
-});
-
-const activePreviewChannel = computed(() => {
-    if (!form.channels?.length) return null;
-
-    const firstId =
-        typeof form.channels[0] === 'object'
-            ? form.channels[0].id
-            : form.channels[0];
-
-
-    return props.availableChannels.find(c => c.id === firstId) || null;
-});
-
-const selectedPreviewChannels = computed(() => {
-    if (!form.channels?.length) return null;
-
-    const selectedIds = form.channels.map(channel =>
-        typeof channel === 'object'
-            ? channel.id
-            : channel
-    );
-
-
-    return props.availableChannels.filter(c => selectedIds.includes(c.id));
-});
-
-
-// ======================================================
-// METHODS (Helpers that are needed before watchers)
-// ======================================================
-
-
-// ======================================================
 // Date Helpers
 // ======================================================
 
@@ -429,6 +349,97 @@ const parseScheduledAt = (scheduledAt) => {
         dateObj: d,
     };
 };
+
+
+// ======================================================
+// State
+// ======================================================
+
+const selectedOption = ref('publish_now');
+
+const selectedChannel = ref(null);
+
+const previewMedia = ref([]);
+
+const deleted_media = ref([]);
+
+const form = reactive({
+    message: props.post?.message || "",
+    date: formatDate(props.selectedDate),
+    time: props.post?.scheduled_at
+        ? props.post.scheduled_at.split(' ')[1]
+        : "09:00",
+    channels: props.post?.channels || [],
+    media: props.post?.media || [],
+    is_scheduled: props.post?.is_scheduled || false,
+    scheduled_at: props.post?.scheduled_at || null,
+    publish_option: props.post?.publish_option || "now",
+    status: props.post?.status || "draft",
+});
+
+
+// ======================================================
+// Computed
+// ======================================================
+
+// minDate
+const minDate = computed(() => {
+    const today = new Date();
+
+    return today.toISOString().split('T')[0];
+});
+
+// Is Edit Mode
+const isEditMode = computed(() => {
+    return !!props.post;
+});
+
+// formChannel
+const formChannel = computed(() => {
+    if (!form.channels?.length) return null;
+
+    const id = form.channels[0]; // assuming one selected channel
+
+    return props.post?.channels.find(c => c.id === id) || null;
+});
+
+// active preview channel (first selected channel or null)
+const activePreviewChannel = computed(() => {
+    if (!form.channels?.length) return null;
+
+    const firstId =
+        typeof form.channels[0] === 'object'
+            // ? form.channels[0].channel_id
+            ? form.channels[0].id
+            : form.channels[0];
+
+    // console.log('First Id: ', firstId);
+    // console.log('Active Preview Channel: ', props.availableChannels.find(c => c.id === firstId));
+
+    return props.availableChannels.find(c => c.id === firstId) || null;
+});
+
+// selected preview channels (all selected channels as objects)
+const selectedPreviewChannels = computed(() => {
+    if (!form.channels?.length) return null;
+
+    const selectedIds = form.channels.map(channel =>
+        typeof channel === 'object'
+            // ? channel.channel_id
+            ? channel.id
+            : channel
+    );
+
+    // console.log('Selected Id: ', selectedIds);
+    // console.log('Active Preview Channel: ', props.availableChannels.filter(c => selectedIds.includes(c.id)));
+
+    return props.availableChannels.filter(c => selectedIds.includes(c.id));
+});
+
+
+// ======================================================
+// METHODS (Helpers that are needed before watchers)
+// ======================================================
 
 
 
@@ -663,6 +674,18 @@ const normalizePostForForm = (post) => {
 // ======================================================
 
 watch(
+    () => props.isVisible,
+    (visible) => {
+        if (!visible) return;
+
+        // Create mode
+        if (!props.post) {
+            resetForm();
+        }
+    }
+);
+
+watch(
     formChannel,
     (value) => {
         // console.log('formChannel changed', value);
@@ -729,6 +752,35 @@ watch(
 
 
 // ======================================================
+// Reset Helpers
+// ======================================================
+const getBlankForm = () => ({
+    message: '',
+    date: formatDate(props.selectedDate),
+    time: '09:00',
+    channels: [],
+    media: [],
+    is_scheduled: false,
+    scheduled_at: null,
+    publish_option: 'now',
+    status: 'draft',
+    id: null,
+    group_id: null,
+    is_grouped: false,
+    posts: [],
+});
+
+const resetForm = () => {
+    Object.assign(form, getBlankForm());
+
+    selectedOption.value = 'publish_now';
+    selectedChannel.value = null;
+    previewMedia.value = [];
+    deleted_media.value = [];
+};
+
+
+// ======================================================
 // Media Helpers
 // ======================================================
 
@@ -744,7 +796,11 @@ const isVideo = (media) => {
 
 const getMediaUrl = (media) => {
     try {
-        if (media.url) return media.url;
+        if (media.file_path) {
+            return media.file_path.startsWith('/')
+                ? media.file_path
+                : `/${media.file_path}`;
+        }
 
         if (typeof File !== 'undefined' && media instanceof File) {
             return URL.createObjectURL(media);
@@ -884,40 +940,42 @@ const clearSelection = () => {
 // Preview Components
 // ======================================================
 
-const getPreviewComponent = (
-    channelName
-) => {
+const getPreviewComponent = (channelName) => {
+    // console.log('channel name passed: ', channelName);
+    
     const normalizedKey =
-        channelName
-            .toLowerCase()
-            .replace(/[-_]/g, '');
+    channelName
+    .toLowerCase()
+    .replace(/[-_]/g, '');
+    
+    // console.log('channel name passed: ', normalizedKey);
 
     switch (normalizedKey) {
         case 'twitter':
         case 'x':
-            return 'TwitterPreview';
+            return TwitterPreview;
 
         case 'facebook':
-            return 'FacebookPreview';
+            return FacebookPreview;
 
         case 'instagram':
-            return 'InstagramPreview';
+            return InstagramPreview;
 
         case 'tiktok':
-            return 'TikTokPreview';
+            return TikTokPreview;
 
         case 'linkedin':
-            return 'LinkedInPreview';
+            return LinkedInPreview;
 
         case 'youtube':
-            return 'YouTubePreview';
+            return YouTubePreview;
 
         case 'google':
         case 'googlebusiness':
-            return 'GooglePreview';
+            return GooglePreview;
 
         default:
-            return 'GenericPreview';
+            return GenericPreview;
     }
 };
 
@@ -1061,7 +1119,7 @@ const submitForm = () => {
         media: form.media,
 
         deleted_media:
-            deletedMedia.value.map(
+            deleted_media.value.map(
                 (media) =>
                     media.id ||
                     media.file_path
@@ -1152,11 +1210,9 @@ const submitForm = () => {
     // Submit
     // --------------------------------------------------
 
-    emit(
-        'formSubmit',
-        postData
-    );
+    emit('formSubmit', postData);
 
+    resetForm();
     closeModal();
 };
 

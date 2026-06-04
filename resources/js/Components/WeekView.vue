@@ -14,13 +14,13 @@
 
             <div class="event-list">
                 <transition-group name="fade" tag="div">
-                    <div v-for="post in getPostsForDate(day)" :key="post.id" :title="post.content" class="post-pill"
+                    <div v-for="post in getPostsForDate(day)" :key="post.id" :title="post.message" class="post-pill"
                         @click.stop="openPostsModal({ post, date: day })">
-                        {{ post.content.slice(0, 15) }}
+                        {{ post.message.slice(0, 15) }}
                     </div>
                 </transition-group>
 
-                <div v-if="getPostsForDate(day).length === 0" class="empty-week">
+                <div v-if="getPostsForDate(day).length === 0 && isFutureOrToday(day)" class="empty-week">
                     No posts scheduled
                 </div>
             </div>
@@ -65,14 +65,30 @@ const isFutureOrToday = (date) => {
     return target >= today;
 };
 
+
+
 const getPostsForDate = (date) => {
     if (!date) return [];
 
-    const dayStr = date.toISOString().split("T")[0];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    return props.posts.filter(p => {
-        const d = (p.scheduled_at || p.created_at).split("T")[0];
-        return d === dayStr;
+    const cellDate = new Date(date);
+    cellDate.setHours(0, 0, 0, 0);
+
+    if (cellDate < today) {
+        return [];
+    }
+
+    const localDateString =
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+    return props.posts.filter(post => {
+        const postDate =
+            (post.scheduled_at || post.published_at)
+                .split(" ")[0];
+
+        return postDate === localDateString;
     });
 };
 

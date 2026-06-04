@@ -3,7 +3,7 @@
         <div v-for="hour in hours" :key="hour" class="day-row">
             <div class="hour-label">{{ hour.toString().padStart(2, '0') }}:00</div>
 
-            <button v-if="isFutureOrToday(props.currentDate)" class="add-btn" @click="openModal(props.currentDate)">
+            <button v-if="canBook(props.currentDate, hour)" class="add-btn" @click="openModal(props.currentDate)">
                 <i class="fa-solid fa-plus"></i>
             </button>
 
@@ -11,11 +11,11 @@
                 <transition-group name="slide-fade" tag="div" class="hour-events">
                     <div v-for="post in postsForHour(hour)" :key="post.id" class="post-pill"
                         @click.stop="openPostsModal(post)">
-                        {{ post.content }}
+                        {{ post.message }}
                     </div>
                 </transition-group>
 
-                <div v-if="postsForHour(hour).length === 0" class="empty-hour">
+                <div v-if="postsForHour(hour).length === 0 && canBook(props.currentDate, hour)" class="empty-hour">
                     No events
                 </div>
             </div>
@@ -34,23 +34,66 @@ const props = defineProps({
 const hours = Array.from({ length: 24 }, (_, i) => i);
 
 // Methods
-const isFutureOrToday = (date) => {
-    if (!date) return false;
+const canBook = (date, hour = null) => {
+    const now = new Date();
 
     const target = new Date(date);
-    const today = new Date();
-
     target.setHours(0, 0, 0, 0);
+
+    const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return target >= today;
+    // Past days
+    if (target < today) return false;
+
+    // Future days
+    if (target > today) return true;
+
+    // SAME DAY → check hour if provided
+    if (hour !== null) {
+        return hour >= now.getHours();
+    }
+
+    return true;
 };
 
 const postsForHour = (hour) => {
-    return props.posts.filter(p => {
-        const d = new Date(p.scheduled_at || p.created_at);
-        return d.getHours() === hour &&
-            d.toDateString() === props.currentDate.toDateString();
+    const now = new Date();
+
+    const selectedDate = new Date(props.currentDate);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Don't show anything for past days
+    if (selectedDate < today) {
+        return [];
+    }
+
+    // Don't show past hours for today
+    if (
+        selectedDate.getTime() === today.getTime() &&
+        hour < now.getHours()
+    ) {
+        return [];
+    }
+
+    const currentDay =
+        `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+
+    return props.posts.filter(post => {
+        const dateTime = post.scheduled_at || post.published_at;
+
+        if (!dateTime) return false;
+
+        const [datePart, timePart] = dateTime.split(" ");
+
+        if (datePart !== currentDay) return false;
+
+        const postHour = Number(timePart.split(":")[0]);
+
+        return postHour === hour;
     });
 };
 

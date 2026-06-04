@@ -43,7 +43,6 @@ import { router } from "@inertiajs/vue3";
 import PostList from "@components/PostList.vue";
 import PostCalendar from "@components/PostCalendar.vue";
 import ViewToggle from "@components/ViewToggle.vue";
-import { getPosts, updatePost } from "@/utils/postUtils";
 import UserLayout from "@/Layouts/UserLayout.vue";
 import PostFormModal from "@/Components/PostFormModal.vue";
 import ScheduledPostModal from "@/Components/ScheduledPostModal.vue";
@@ -269,10 +268,15 @@ const handleFormSubmit = async (data) => {
             }
 
             // dumpFormData(formData);
+            // ==================================================
+            // UPDATE MULTIPLE EXISTING POSTS (grouped post edit)
+            // Route should point to an UPDATE endpoint
+            // Example: posts.update
+            // ==================================================
 
             router.post(
                 route(
-                    'social-archive.post.update',
+                    'posts.update',
                     post.id
                 ),
                 formData,
@@ -284,6 +288,8 @@ const handleFormSubmit = async (data) => {
                         console.log(
                             `✅ Updated post ${post.id}`
                         );
+
+                        // modalRef.value?.resetForm();
                     },
 
                     onError: (err) => {
@@ -425,10 +431,14 @@ const handleFormSubmit = async (data) => {
         }
 
         // dumpFormData(formData);
-
+        // ==================================================
+        // UPDATE SINGLE EXISTING POST
+        // Route should point to an UPDATE endpoint
+        // Example: posts.update
+        // ==================================================
         router.post(
             route(
-                'social-archive.post.update',
+                'posts.update',
                 data.id
             ),
             formData,
@@ -440,6 +450,8 @@ const handleFormSubmit = async (data) => {
                     console.log(
                         `✅ Updated post ${data.id}`
                     );
+
+                    // modalRef.value?.resetForm();
                 },
 
                 onError: (err) => {
@@ -514,10 +526,15 @@ const handleFormSubmit = async (data) => {
                 }
             );
         }
+        // ==================================================
+        // CREATE NEW POST
+        // Route should point to a STORE/CREATE endpoint
+        // Example: posts.store
+        // ==================================================
 
         router.post(
             route(
-                'facebook.publish'
+                'posts.store'
             ),
             formData,
             {
@@ -527,6 +544,8 @@ const handleFormSubmit = async (data) => {
                     console.log(
                         '✅ Post created successfully'
                     );
+
+                    // modalRef.value?.resetForm();
                 },
 
                 onError: (
