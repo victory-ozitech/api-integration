@@ -147,9 +147,13 @@
 
             <div class="actions-row">
 
-                <a :href="route('posts.edit', { id: props.post.id })" class="action-btn">
+                <a v-if="props.post?.is_scheduled" :href="route('posts.edit', { id: props.post.id })" class="action-btn">
                     <i class="fa-regular fa-pen-to-square"></i>
                 </a>
+
+                        <a v-else class="view-post-btn action-btn" href="#" target="_blank" rel="noopener noreferrer"><i
+                                class="fa-solid fa-up-right-from-square"></i> View Post</a>
+
 
                 <button class="action-btn delete" @click="remove">
                     <i class="fa-regular fa-trash-can"></i>
@@ -652,6 +656,15 @@ const getMediaUrl = (media) => {
         .actions-row {
             display: flex;
             gap: 10px;
+
+            .view-post-btn {
+                padding: 8px 14px;
+                width: max-content !important;
+
+                &:hover {
+                    background: rgba(59, 130, 246, .2);
+                }
+            }
 
             .action-btn {
                 width: 42px;

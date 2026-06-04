@@ -656,7 +656,9 @@ const closeModal = () => {
                 >div {
                     overflow: hidden;
                     border-radius: 24px;
-                    // height: 150px;
+                }
+                img {
+                    height: 100px;
                 }
 
                 .overlay {
