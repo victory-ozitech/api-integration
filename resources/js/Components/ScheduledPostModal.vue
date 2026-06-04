@@ -103,7 +103,7 @@
                                         :src="getMediaUrl(file)" />
                                     <div v-if="props.post.media.length > 4" class="overlay">+{{ props.post.media.length
                                         - 4
-                                        }}
+                                    }}
                                     </div>
                                 </div>
                             </template>
@@ -153,9 +153,12 @@
 
 
                     <div class="actions-row">
-                        <button class="action-btn" @click.stop="editPost(post)">
+                        <button v-if="props.post?.is_scheduled" class="action-btn" @click.stop="editPost(post)">
                             <i class="fa-regular fa-pen-to-square"></i>
                         </button>
+
+                        <a v-else class="view-post-btn action-btn" href="#" target="_blank" rel="noopener noreferrer"><i
+                                class="fa-solid fa-up-right-from-square"></i> View Post</a>
 
                         <button @click="addNew" class="action-btn">
                             <i class="fa-solid fa-plus"></i>
@@ -171,7 +174,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted } from 'vue';
 
 
 // Props
@@ -184,6 +187,9 @@ const props = defineProps({
     },
 });
 
+onMounted(() => {
+    console.log("Post for Modal:", props.post);
+})
 
 
 
@@ -707,6 +713,15 @@ const closeModal = () => {
         .actions-row {
             display: flex;
             gap: 10px;
+
+            .view-post-btn {
+                padding: 8px 14px;
+                width: max-content !important;
+
+                &:hover {
+                    background: rgba(59, 130, 246, .2);
+                }
+            }
 
             .action-btn {
                 width: 42px;
