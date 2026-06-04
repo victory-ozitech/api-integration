@@ -139,6 +139,34 @@ class FacebookAuthController extends Controller
         return back()->with('success', 'Page selected successfully.');
     }
 
+    public function disconnectPage(Channel $channel)
+    {
+        $channel->delete();
+
+        return back()->with(
+            'success',
+            'Page disconnected successfully.'
+        );
+    }
+
+    public function disconnectAccount()
+    {       
+        $facebookAccount = FacebookAccount::where('user_id', 1)->first();
+        if(!$facebookAccount) {
+            return back()->with('error', 'No Facebook account connected.');
+        }
+
+        Channel::where('facebook_account_id', $facebookAccount->id)->delete();
+        $facebookAccount->delete();
+
+        return redirect()
+            ->route('facebook.connect')
+            ->with(
+            'success',
+            'Facebook disconnected successfully.'
+        );
+    }
+
     // Centralizes Http::withoutVerifying() in one place
     private function facebookGet(string $endpoint, array $params)
     {

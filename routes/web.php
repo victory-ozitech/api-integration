@@ -24,6 +24,7 @@ Route::controller(FacebookAuthController::class)->group(function () {
     Route::get('/auth/facebook', 'redirectToFacebook')->name('facebook.redirect');
     Route::get('/auth/facebook/callback', 'handleCallback')->name('facebook.callback');
     Route::post('/auth/facebook/select-page', 'selectedPage')->name('facebook.select-page');
+    Route::post('/auth/facebook/disconnect-page', 'disconnectPage')->name('facebook.disconnect-page');
 });
 
 // Posts

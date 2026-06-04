@@ -7,7 +7,7 @@
         </div>
 
         <div class="row g-2">
-            <div class="col-md-8">
+            <div class="col-lg-8">
                 <!-- Card -->
                 <div class="form-card">
                     <form @submit.prevent.stop="submitForm">
@@ -187,7 +187,7 @@
 
                 </div>
             </div>
-            <div v-if="activePreviewChannel" class="col-md-4">
+            <div v-if="activePreviewChannel" class="col-lg-4">
                 <div class="right-col">
                     <div class="preview-card">
                         <component :is="getPreviewComponent(activePreviewChannel.platform)" :form="form"

@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Http;
 
 class FacebookPublisher
 {
+    private string $baseUrl = 'https://graph.facebook.com/v25.0/';
+
     public function publish(SchedulePost $post, array $uploadedFiles): void
     {
         foreach ($post->channels as $postChannel) {
@@ -45,6 +47,38 @@ class FacebookPublisher
         }
     }
 
+    private function post(string $endpoint, array $data)
+    {
+        return Http::post($this->baseUrl . $endpoint, $data);
+    }
+
+    private function delete(string $endpoint, array $data)
+    {
+        return Http::delete($this->baseUrl . $endpoint, $data);
+    }
+
+    /**
+     * Stabilized: Expects a RAW system path now to avoid public_path nesting anomalies.
+     */
+    private function attachFile(
+        string $endpoint,
+        string $absoluteFilePath,
+        string $fileName,
+        array $data,
+        int $timeout = 30
+    ) {
+        return Http::timeout($timeout)
+            ->attach(
+                'source',
+                fopen($absoluteFilePath, 'r'),
+                $fileName
+            )
+            ->post(
+                $this->baseUrl . $endpoint,
+                $data
+            );
+    }
+    
     private function sendToFacebook($channel, string $message, array $uploadedFiles)
     {
         $images = array_filter($uploadedFiles, fn($f) => str_starts_with($f['mime_type'], 'image/'));
@@ -69,25 +103,24 @@ class FacebookPublisher
     |------------------------------------------
     | MULTIPLE IMAGES
     |------------------------------------------
+    | Fixed: Uses raw standard form post to complete the compilation feed
     */
     private function postMultipleImages($channel, string $message, array $images)
     {
         $mediaIds = [];
 
         foreach ($images as $image) {
-            $filePath = public_path($image['file_path']);
+            $absolutePath = public_path($image['file_path']);
 
-            if (!file_exists($filePath)) {
-                logger()->error('File not found: ' . $filePath);
+            if (!file_exists($absolutePath)) {
+                logger()->error('File not found: ' . $absolutePath);
                 continue;
             }
 
-            $uploadResponse = Http::attach(
-                'source',
-                fopen($filePath, 'r'),
-                $image['file_name']
-            )->post(
-                "https://graph.facebook.com/v25.0/{$channel->channel_id}/photos",
+            $uploadResponse = $this->attachFile(
+                "{$channel->channel_id}/photos",
+                $absolutePath,
+                $image['file_name'],
                 [
                     'published' => 'false',
                     'access_token' => $channel->access_token,
@@ -110,14 +143,12 @@ class FacebookPublisher
 
         $attachedMedia = array_map(fn($id) => ['media_fbid' => $id], $mediaIds);
 
-        return Http::asForm()->post(
-            "https://graph.facebook.com/v25.0/{$channel->channel_id}/feed",
-            [
-                'message' => $message,
-                'access_token' => $channel->access_token,
-                'attached_media' => json_encode($attachedMedia),
-            ]
-        );
+        // Correct Implementation: Send the compiled album references via JSON
+        return $this->post("{$channel->channel_id}/feed", [
+            'message' => $message,
+            'access_token' => $channel->access_token,
+            'attached_media' => $attachedMedia, // Laravel HTTP client auto-encodes arrays
+        ]);
     }
 
     /*
@@ -127,12 +158,10 @@ class FacebookPublisher
     */
     private function postSingleImage($channel, string $message, array $image)
     {
-        return Http::attach(
-            'source',
-            fopen(public_path($image['file_path']), 'r'),
-            $image['file_name']
-        )->post(
-            "https://graph.facebook.com/v25.0/{$channel->channel_id}/photos",
+        return $this->attachFile(
+            "{$channel->channel_id}/photos",
+            public_path($image['file_path']),
+            $image['file_name'],
             [
                 'message' => $message,
                 'access_token' => $channel->access_token,
@@ -144,19 +173,19 @@ class FacebookPublisher
     |------------------------------------------
     | SINGLE VIDEO
     |------------------------------------------
+    | Swept out duplicate artifacts here
     */
     private function postVideo($channel, string $message, array $video)
     {
-        return Http::timeout(120)->attach(
-            'source',
-            fopen(public_path($video['file_path']), 'r'),
-            $video['file_name']
-        )->post(
-            "https://graph.facebook.com/v25.0/{$channel->channel_id}/videos",
+        return $this->attachFile(
+            "{$channel->channel_id}/videos",
+            public_path($video['file_path']),
+            $video['file_name'],
             [
                 'description' => $message,
                 'access_token' => $channel->access_token,
-            ]
+            ],
+            120
         );
     }
 
@@ -167,19 +196,15 @@ class FacebookPublisher
     */
     private function postText($channel, string $message)
     {
-        return Http::post(
-            "https://graph.facebook.com/v25.0/{$channel->channel_id}/feed",
-            [
-                'message' => $message,
-                'access_token' => $channel->access_token,
-            ]
-        );
+        return $this->post("{$channel->channel_id}/feed", [
+            'message' => $message,
+            'access_token' => $channel->access_token,
+        ]);
     }
 
     public function updatePost(string $facebookPostId, string $message, $channel): void
     {
-        // Facebook only allows editing the message, not media
-        Http::post("https://graph.facebook.com/v25.0/{$facebookPostId}", [
+        $this->post("{$facebookPostId}", [
             'message' => $message,
             'access_token' => $channel->access_token,
         ]);
@@ -187,9 +212,8 @@ class FacebookPublisher
 
     public function deletePost(string $facebookPostId, $channel): void
     {
-        Http::delete("https://graph.facebook.com/v25.0/{$facebookPostId}", [
+        $this->delete("{$facebookPostId}", [
             'access_token' => $channel->access_token,
         ]);
     }
-
 }

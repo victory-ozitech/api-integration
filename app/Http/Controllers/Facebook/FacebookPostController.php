@@ -49,6 +49,7 @@ class FacebookPostController extends Controller
             'scheduled_at' => $request->scheduled_at,
             'status'       => $isScheduled ? 'scheduled' : 'published',
             'published_at' => $isScheduled ? null : now(),
+            'is_scheduled' => $isScheduled ? 1 : 0,
         ]);
 
         $uploadedFiles = $this->saveMedia($request, $post);
@@ -58,7 +59,7 @@ class FacebookPostController extends Controller
             $this->facebookPublisher->publish($post, $uploadedFiles);
         }
 
-        return back()->with(
+        return redirect()->route('posts.index')->with(
             'success',
             $isScheduled ? 'Post scheduled successfully.' : 'Post published successfully.'
         );
@@ -66,14 +67,22 @@ class FacebookPostController extends Controller
 
     public function update(Request $request, SchedulePost $post)
     {
+        
+        dd($request->all());
         $request->validate([
             'message'      => 'nullable|string',
-            'scheduled_at' => 'nullable|date',
-            'media'        => 'nullable|array',
-            'media.*'      => 'file|max:51200',
+            'scheduled_at' => 'nullable|date_format:Y-m-d H:i:s',
         ]);
 
-        $isScheduled  = $this->isScheduled($request->scheduled_at);
+        if ($request->hasFile('media')) {
+            $request->validate([
+                'media.*' => 'file|max:51200',
+            ]);
+        }
+
+        $isScheduled = $request->is_scheduled === '1' 
+        && !empty($request->scheduled_at) 
+        && now()->lt($request->scheduled_at);
         $wasPublished = $post->status === 'published';
 
         $post->update([
@@ -81,6 +90,7 @@ class FacebookPostController extends Controller
             'scheduled_at' => $request->scheduled_at,
             'status'       => $isScheduled ? 'scheduled' : 'published',
             'published_at' => $isScheduled ? null : now(),
+            'is_scheduled' => $isScheduled ? 1 : 0,
         ]);
 
         [$uploadedFiles, $mediaChanged] = $this->updateMedia($request, $post);
@@ -89,7 +99,7 @@ class FacebookPostController extends Controller
             $this->handleFacebookUpdate($post, $request->message, $uploadedFiles, $wasPublished, $mediaChanged);
         }
 
-        return back()->with(
+        return redirect()->route('posts.index')->with(
             'success',
             $isScheduled ? 'Post updated successfully.' : 'Post published successfully.'
         );
@@ -117,7 +127,7 @@ class FacebookPostController extends Controller
 
         $post->delete();
 
-        return back()->with('success', 'Post deleted successfully.');
+        return redirect()->route('posts.index')->with('success', 'Post deleted successfully.');
     }
 
     // -------------------------------------------------------
@@ -150,40 +160,53 @@ class FacebookPostController extends Controller
 
     private function updateMedia(Request $request, SchedulePost $post): array
     {
-        if (!$request->hasFile('media')) {
-            // No new files — return existing media from DB
-            $existing = $post->media->map(fn($m) => [
-                'file_path' => $m->file_path,
-                'file_name' => $m->file_name,
-                'mime_type' => $m->mime_type,
-            ])->toArray();
+        $hasNewFiles = $request->hasFile('media');
+        $keptMediaIds = $request->input('existing_media', []);
 
-            return [$existing, false];
-        }
-
-        // Delete old files from storage
+        // Delete only media the user removed
         foreach ($post->media as $oldMedia) {
-            $oldPath = public_path($oldMedia->file_path);
-            if (file_exists($oldPath)) {
-                unlink($oldPath);
+            if (!in_array($oldMedia->id, $keptMediaIds)) {
+                $oldPath = public_path($oldMedia->file_path);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+                $oldMedia->delete();
             }
         }
 
-        $post->media()->delete();
+        // Upload new files if any
+        $newlyUploadedFiles = [];
 
-        $uploadedFiles = UploadService::upload($request->file('media'), 'posts');
+        if ($hasNewFiles) {
+            $newlyUploadedFiles = UploadService::upload(
+                $request->file('media'),
+                'posts'
+            );
 
-        foreach ($uploadedFiles as $file) {
-            PostMedia::create([
-                'schedule_post_id' => $post->id,
-                'file_path'        => $file['file_path'],
-                'file_name'        => $file['file_name'],
-                'mime_type'        => $file['mime_type'],
-                'file_size'        => $file['file_size'],
-            ]);
+            foreach ($newlyUploadedFiles as $file) {
+                PostMedia::create([
+                    'schedule_post_id' => $post->id,
+                    'file_path'        => $file['file_path'],
+                    'file_name'        => $file['file_name'],
+                    'mime_type'        => $file['mime_type'],
+                    'file_size'        => $file['file_size'],
+                ]);
+            }
         }
 
-        return [$uploadedFiles, true];
+        // Build full uploadedFiles array for FacebookPublisher
+        // Combine kept existing media + newly uploaded files
+        $post->refresh();
+
+        $allFiles = $post->media->map(fn($m) => [
+            'file_path' => $m->file_path,
+            'file_name' => $m->file_name,
+            'mime_type' => $m->mime_type,
+        ])->toArray();
+
+        $mediaChanged = count($keptMediaIds) !== $post->media->count() || $hasNewFiles;
+
+        return [$allFiles, $mediaChanged];
     }
 
     private function saveChannels(array $channels, SchedulePost $post, bool $isScheduled): void

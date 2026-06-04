@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('message');
             $table->timestamp('scheduled_at')->nullable();
             $table->enum('status', ['draft', 'scheduled', 'published', 'publishing', 'failed'])->default('draft');
+            $table->tinyInteger('is_scheduled')->default(0);
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
         });
