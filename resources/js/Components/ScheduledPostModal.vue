@@ -491,7 +491,8 @@ const closeModal = () => {
         flex-grow: 1; // media takes remaining height
         display: flex;
         flex-direction: column;
-        max-height: 250px;
+        max-height: 350px;
+        max-width: 350px;
 
         /* Placeholder */
         .image-placeholder {
@@ -576,7 +577,7 @@ const closeModal = () => {
             display: grid;
             gap: 4px;
             border-radius: 24px;
-            max-height: 250px;
+            max-height: 350px;
             overflow: hidden; // Make sure children respect radius
 
             img {
@@ -605,7 +606,7 @@ const closeModal = () => {
             /* 1 image */
             .single-media {
                 width: 100%;
-                height: 250px;
+                // height: 350px;
                 border-radius: 24px;
                 overflow: hidden;
             }
@@ -617,7 +618,7 @@ const closeModal = () => {
                 >div {
                     overflow: hidden;
                     border-radius: 24px;
-                    height: 250px;
+                    // height: 350px;
                 }
             }
 
@@ -655,7 +656,7 @@ const closeModal = () => {
                 >div {
                     overflow: hidden;
                     border-radius: 24px;
-                    height: 150px;
+                    // height: 150px;
                 }
 
                 .overlay {
