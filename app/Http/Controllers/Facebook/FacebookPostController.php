@@ -67,8 +67,6 @@ class FacebookPostController extends Controller
 
     public function update(Request $request, SchedulePost $post)
     {
-        
-        dd($request->all());
         $request->validate([
             'message'      => 'nullable|string',
             'scheduled_at' => 'nullable|date_format:Y-m-d H:i:s',
@@ -158,32 +156,36 @@ class FacebookPostController extends Controller
         return $uploadedFiles;
     }
 
-    private function updateMedia(Request $request, SchedulePost $post): array
+   private function updateMedia(Request $request, SchedulePost $post): array
     {
-        $hasNewFiles = $request->hasFile('media');
-        $keptMediaIds = $request->input('existing_media', []);
+        // Handle deleted media
+        if ($request->deleted_media && $request->deleted_media !== '[]') {
+            $deletedIds = is_array($request->deleted_media) 
+                ? $request->deleted_media 
+                : json_decode($request->deleted_media, true);
 
-        // Delete only media the user removed
-        foreach ($post->media as $oldMedia) {
-            if (!in_array($oldMedia->id, $keptMediaIds)) {
-                $oldPath = public_path($oldMedia->file_path);
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
+            if (!empty($deletedIds)) {
+                foreach ($post->media as $oldMedia) {
+                    if (in_array($oldMedia->id, $deletedIds) || 
+                        in_array($oldMedia->file_path, $deletedIds)) {
+                        $oldPath = public_path($oldMedia->file_path);
+                        if (file_exists($oldPath)) {
+                            unlink($oldPath);
+                        }
+                        $oldMedia->delete();
+                    }
                 }
-                $oldMedia->delete();
             }
         }
 
-        // Upload new files if any
-        $newlyUploadedFiles = [];
-
-        if ($hasNewFiles) {
-            $newlyUploadedFiles = UploadService::upload(
+        // Upload and add new files to existing ones
+        if ($request->hasFile('media')) {
+            $newFiles = UploadService::upload(
                 $request->file('media'),
                 'posts'
             );
 
-            foreach ($newlyUploadedFiles as $file) {
+            foreach ($newFiles as $file) {
                 PostMedia::create([
                     'schedule_post_id' => $post->id,
                     'file_path'        => $file['file_path'],
@@ -194,8 +196,7 @@ class FacebookPostController extends Controller
             }
         }
 
-        // Build full uploadedFiles array for FacebookPublisher
-        // Combine kept existing media + newly uploaded files
+        // Refresh and return all current media
         $post->refresh();
 
         $allFiles = $post->media->map(fn($m) => [
@@ -204,7 +205,8 @@ class FacebookPostController extends Controller
             'mime_type' => $m->mime_type,
         ])->toArray();
 
-        $mediaChanged = count($keptMediaIds) !== $post->media->count() || $hasNewFiles;
+        $mediaChanged = $request->hasFile('media') || 
+            ($request->deleted_media && $request->deleted_media !== '[]');
 
         return [$allFiles, $mediaChanged];
     }
