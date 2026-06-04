@@ -15,7 +15,7 @@ Route::controller(DashBoardController::class)->group(function () {
     Route::get('/', 'dashboard')->name('dashboard');
     Route::get('/index', 'index')->name('posts.index');
     Route::get('/create', 'create')->name('posts.create');
-    Route::get('/{id}/edit', 'edit')->name('posts.edit');
+    Route::get('/{post}/edit', 'edit')->name('posts.edit');
 });
 
 // Facebook Auth
