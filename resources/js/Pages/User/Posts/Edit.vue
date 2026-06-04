@@ -201,6 +201,7 @@ const props = defineProps({
 
 onMounted(() => {
     console.log("Available Channels:", props.channels);
+    console.log("Post Prop:", props.post);
 })
 
 

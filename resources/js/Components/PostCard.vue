@@ -22,12 +22,18 @@ const remove = () => {
 };
 
 const formatDate = (date) => {
+    if (!date) return "Not scheduled";
+    
+    const parsedDate = new Date(date.replace(" ", "T"));
+    
+    if (isNaN(parsedDate.getTime())) return "Invalid date";
+
     return new Intl.DateTimeFormat("en-US", {
         month: "short",
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
-    }).format(new Date(date.replace(" ", "T")));
+    }).format(parsedDate);
 };
 </script>
 
@@ -53,7 +59,7 @@ const formatDate = (date) => {
 
                     <div class="post-date">
                         <i class="fa-regular fa-clock"></i>
-                        <!-- {{ formatDate(props.post.scheduled_at ?? '') }} -->
+                        {{ formatDate(props.post.scheduled_at ?? '') }}
                     </div>
                 </div>
 

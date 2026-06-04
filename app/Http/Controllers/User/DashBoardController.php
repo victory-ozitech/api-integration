@@ -45,6 +45,7 @@ class DashBoardController extends Controller
 
         $channels = Channel::where('user_id', 1)->get();
 
+        return $post;
         return Inertia::render('User/Posts/Edit', [
             'post'     => $post,
             'channels' => $channels,
