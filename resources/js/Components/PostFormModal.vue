@@ -29,21 +29,24 @@
                                     </div>
                                     <div class="social-media-profile-cont">
                                         <!-- Show only the selected channel if editing -->
-                                        <div v-if="isEditMode && formChannel" class="profile-img active disabled"
-                                            :title="`This post is linked to ${formChannel.channel_name ||
-                                                'Unknown Channel'}. Channel cannot be changed.`">
-                                            <img :src="formChannel.avatar || '/assets/images/profile-img.png'"
-                                                :alt="formChannel.channel_name || 'Channel Avatar'" />
-                                            <span class="social-icon">
-                                                <i :class="getChannelIcon(formChannel.platform || 'facebook')"></i>
-                                            </span>
-                                            <div class="selected-badge-edit">
-                                                ✓
-                                            </div>
-                                            <div class="channel-lock-overlay">
-                                                <i class="fas fa-lock"></i>
-                                            </div>
-                                        </div>
+                                         <template v-if="isEditMode && formChannels">
+                                             <div v-for="channel in formChannels" :key="channel.id || channel.channel_id"
+                                                class="profile-img active disabled"
+                                                 :title="`This post is linked to ${channel.channel_name ||
+                                                     'Unknown Channel'}. Channel cannot be changed.`">
+                                                 <img :src="channel.avatar || '/assets/images/profile-img.png'"
+                                                     :alt="channel.channel_name || 'Channel Avatar'" />
+                                                 <span class="social-icon">
+                                                     <i :class="getChannelIcon(channel.platform || 'facebook')"></i>
+                                                 </span>
+                                                 <div class="selected-badge-edit">
+                                                     ✓
+                                                 </div>
+                                                 <div class="channel-lock-overlay">
+                                                     <i class="fas fa-lock"></i>
+                                                 </div>
+                                             </div>
+                                         </template>
                                         <template v-else>
                                             <div v-for="channel in availableChannels" :key="channel.id"
                                                 class="profile-img" :class="{
@@ -242,7 +245,7 @@
                                         <div class="info-content">
                                             <strong>Preview:</strong> Showing <strong>{{
                                                 activePreviewChannel.channel_name
-                                                }}</strong> preview
+                                            }}</strong> preview
                                             <div class="other-channels">
                                                 Also posting to:
                                                 <span v-for="(ch, index) in selectedPreviewChannels.slice(1)"
@@ -395,12 +398,26 @@ const isEditMode = computed(() => {
 });
 
 // formChannel
-const formChannel = computed(() => {
+const formChannels = computed(() => {
     if (!form.channels?.length) return null;
 
-    const id = form.channels[0]; // assuming one selected channel
+    // console.log('Post prop: ', props.post);
+    // console.log('Form: ', form);
+    // console.log('Form Channels: ', form.channels);
 
-    return props.post?.channels.find(c => c.id === id) || null;
+    const selectedIds = form.channels; // assuming one selected channel
+
+    // return props.post?.channels.find(c => c.id === id) || null;
+
+    // console.log('Selected Id: ', props.post.channels
+    //     .filter(c => selectedIds.includes(c.channel_id))
+    //     // .filter(c => selectedIds.includes(c.id))
+    //     .map(c => c.channel));
+
+    return props.post.channels
+        .filter(c => selectedIds.includes(c.channel_id))
+        // .filter(c => selectedIds.includes(c.id))
+        .map(c => c.channel);
 });
 
 // active preview channel (first selected channel or null)
@@ -458,8 +475,8 @@ const extractChannelsFromPost = (post) => {
             .map((channel) =>
                 typeof channel === 'object'
                     ? (
-                        channel.id ??
                         channel.channel_id ??
+                        channel.id ??
                         null
                     )
                     : channel
@@ -686,9 +703,9 @@ watch(
 );
 
 watch(
-    formChannel,
+    formChannels,
     (value) => {
-        // console.log('formChannel changed', value);
+        // console.log('formChannels changed', value);
     },
     {
         deep: true,
@@ -942,12 +959,12 @@ const clearSelection = () => {
 
 const getPreviewComponent = (channelName) => {
     // console.log('channel name passed: ', channelName);
-    
+
     const normalizedKey =
-    channelName
-    .toLowerCase()
-    .replace(/[-_]/g, '');
-    
+        channelName
+            .toLowerCase()
+            .replace(/[-_]/g, '');
+
     // console.log('channel name passed: ', normalizedKey);
 
     switch (normalizedKey) {

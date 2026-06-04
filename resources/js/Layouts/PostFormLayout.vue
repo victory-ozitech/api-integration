@@ -18,7 +18,7 @@ import UserLayout from "@/Layouts/UserLayout.vue";
 @use "@sass/variables.scss" as *;
 
 .create-wrap {
-    max-width: 720px;
+    // max-width: 720px;
     margin: 0 auto;
     padding: 30px 20px;
 }
@@ -418,5 +418,47 @@ input{
 .btn-primary-custom:hover {
     transform: translateY(-2px);
     box-shadow: 0 18px 40px rgba(16, 185, 129, 0.35);
+}
+
+.right-col {
+    width: 100%;
+    height: 100%;background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(12px);
+    
+        border-radius: 28px;
+    padding: 25px 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    // Channel Selection Info
+        .channel-selection-info {
+            .info-card {
+                display: flex;
+                align-items: flex-start;
+                gap: 8px;
+                padding: 12px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                border: 1px solid #e9ecef;
+    
+                i {
+                    color: #6c757d;
+                    margin-top: 2px;
+                }
+    
+                .info-content {
+                    font-size: 12px;
+                    color: #495057;
+    
+                    .other-channels {
+                        margin-top: 4px;
+    
+                        .channel-tag {
+                            font-weight: 500;
+                            color: #007bff;
+                        }
+                    }
+                }
+            }
+        }
 }
 </style>
