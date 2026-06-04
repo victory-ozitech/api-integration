@@ -103,7 +103,7 @@
                                         :src="getMediaUrl(file)" />
                                     <div v-if="props.post.media.length > 4" class="overlay">+{{ props.post.media.length
                                         - 4
-                                        }}
+                                    }}
                                     </div>
                                 </div>
                             </template>
@@ -571,90 +571,186 @@ const closeModal = () => {
             }
         }
 
+        //         .media-grid {
+        //             display: grid;
+        //             gap: 4px;
+        //             border-radius: 24px;
+        //             // max-height: 250px;
+        //             overflow: hidden; // Make sure children respect radius
+
+        //             img {
+        //                 width: 100%;
+        //                 height: 100%;
+        //                 object-fit: cover;
+        //                 display: block;
+        //                 border-radius: 0; // Rounded corners handled by parent wrapper
+        //             }
+
+        //             .two-grid,
+        //             .three-grid,
+        //             .four-grid {
+        //                 display: grid;
+        //             }
+
+        //             .single-media,
+        //             .two-grid>div,
+        //             .three-grid .large,
+        //             .three-grid .two-small>div,
+        //             .four-grid>div {
+        //                 border-radius: 0;
+        //                 overflow: hidden;
+        //             }
+
+        //             /* 1 image */
+        //             .single-media {
+        //                 width: 100%;
+        //                 height: 250px;
+        //                 border-radius: 24px;
+        //                 overflow: hidden;
+        //                 aspect-ratio: 16/9; // or 4/3 depending on design
+        //             }
+
+        //             /* 2 images */
+        //             .two-grid {
+        //                 grid-template-columns: 1fr 1fr;
+
+        //                 >img {
+        //                         aspect-ratio: 1/1; // square images
+        //                         border-radius: 24px;
+        //                     }
+
+        //                 >div {
+        //                     overflow: hidden;
+        //                     border-radius: 24px;
+        //                     height: 250px;
+        //                 }
+        //             }
+
+        //             /* 3 images */
+        //             .three-grid {
+        //                 grid-template-columns: 2fr 1fr;
+        //                 grid-template-rows: 1fr 1fr;
+        //                 gap: 2px;
+
+        //                 .large {
+        //                     grid-row: span 2;
+        //                     overflow: hidden;
+        // aspect-ratio: 2/3;
+        //                     border-radius: 24px 0 0 24px;
+        //                 }
+
+        //                 .two-small {
+        //                     display: grid;
+        //                     grid-template-rows: 1fr 1fr;
+        //                     gap: 2px;
+        // >img {
+        //         aspect-ratio: 1/1;
+        //         border-radius: 0 24px 24px 0;
+        //     }
+
+        //                     >div {
+        //                         overflow: hidden;
+        //                         border-radius: 0 24px 24px 0;
+        //                     }
+        //                 }
+        //             }
+
+        //             /* 4+ images */
+        //             .four-grid {
+        //                 grid-template-columns: 1fr 1fr;
+        //                 grid-template-rows: 1fr 1fr;
+        //                 gap: 2px;
+        //                 position: relative;
+        // >img {
+        //         aspect-ratio: 1/1;
+        //         border-radius: 24px;
+        //     }
+
+        //                 >div {
+        //                     overflow: hidden;
+        //                     border-radius: 24px;
+        //                     height: 150px;
+        //                 }
+
+        //                 .overlay {
+        //                     position: absolute;
+        //                     bottom: 8px;
+        //                     right: 8px;
+        //                     background: rgba(0, 0, 0, 0.6);
+        //                     color: #fff;
+        //                     font-weight: bold;
+        //                     padding: 6px 10px;
+        //                     border-radius: 8px;
+        //                 }
+        //             }
+        //         }
+
         .media-grid {
             display: grid;
             gap: 4px;
             border-radius: 24px;
-            max-height: 250px;
-            overflow: hidden; // Make sure children respect radius
+            overflow: hidden;
 
             img {
                 width: 100%;
                 height: 100%;
-                object-fit: cover;
+                object-fit: cover; // preserve image ratio without stretching
                 display: block;
-                border-radius: 0; // Rounded corners handled by parent wrapper
             }
 
-            .two-grid,
-            .three-grid,
-            .four-grid {
-                display: grid;
-            }
-
-            .single-media,
-            .two-grid>div,
-            .three-grid .large,
-            .three-grid .two-small>div,
-            .four-grid>div {
-                border-radius: 0;
-                overflow: hidden;
-            }
-
-            /* 1 image */
+            /* Single image */
             .single-media {
-                width: 100%;
-                height: 250px;
+                aspect-ratio: 16/9; // wide single image
                 border-radius: 24px;
-                overflow: hidden;
             }
 
-            /* 2 images */
+            /* Two images side by side */
             .two-grid {
                 grid-template-columns: 1fr 1fr;
+                gap: 4px;
 
-                >div {
-                    overflow: hidden;
+                >img {
+                    aspect-ratio: 1/1; // square images
                     border-radius: 24px;
-                    height: 250px;
                 }
             }
 
-            /* 3 images */
+            /* Three images: 1 large, 2 stacked */
             .three-grid {
+                display: grid;
                 grid-template-columns: 2fr 1fr;
                 grid-template-rows: 1fr 1fr;
-                gap: 2px;
+                gap: 4px;
 
                 .large {
                     grid-row: span 2;
-                    overflow: hidden;
+                    aspect-ratio: 2/3; // taller large image
                     border-radius: 24px 0 0 24px;
                 }
 
                 .two-small {
                     display: grid;
                     grid-template-rows: 1fr 1fr;
-                    gap: 2px;
+                    gap: 4px;
 
-                    >div {
-                        overflow: hidden;
+                    >img {
+                        aspect-ratio: 1/1;
                         border-radius: 0 24px 24px 0;
                     }
                 }
             }
 
-            /* 4+ images */
+            /* Four images */
             .four-grid {
+                display: grid;
                 grid-template-columns: 1fr 1fr;
                 grid-template-rows: 1fr 1fr;
-                gap: 2px;
+                gap: 4px;
                 position: relative;
 
-                >div {
-                    overflow: hidden;
+                >img {
+                    aspect-ratio: 1/1; // square
                     border-radius: 24px;
-                    height: 150px;
                 }
 
                 .overlay {
@@ -666,6 +762,35 @@ const closeModal = () => {
                     font-weight: bold;
                     padding: 6px 10px;
                     border-radius: 8px;
+                }
+            }
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 600px) {
+            .three-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+                gap: 4px;
+
+                .large,
+                .two-small>img {
+                    aspect-ratio: auto;
+                    border-radius: 24px;
+                }
+
+                .two-small {
+                    grid-template-rows: 1fr 1fr;
+                }
+            }
+
+            .two-grid,
+            .four-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 4px;
+
+                >img {
+                    aspect-ratio: 1/1;
                 }
             }
         }
@@ -746,6 +871,18 @@ const closeModal = () => {
                     color: #ef4444;
                 }
             }
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .three-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+
+        .large,
+        .two-small>img {
+            aspect-ratio: auto;
         }
     }
 }
