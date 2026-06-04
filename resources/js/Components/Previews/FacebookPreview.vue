@@ -71,7 +71,7 @@
                                 <!-- If video -->
                                 <div v-if="isVideo(media)">
                                     <video class="w-100 rounded" controls>
-                                        <source :src="media.url" :type="media.type" />
+                                        <source :src="media.file_path || media.url" :type="media.type" />
                                         Your browser does not support video playback.
                                     </video>
                                     🎥 Video
