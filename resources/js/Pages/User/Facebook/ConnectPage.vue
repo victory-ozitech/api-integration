@@ -17,7 +17,7 @@
 
                             <div class="profile d-flex align-items-center mt-3">
                                 <div class="avatar-ring">
-                                    <img :src="page.picture?.data?.url || ''" class="avatar" />
+                                    <img :src="page.avatar || ''" class="avatar" />
                                 </div>
 
                                 <div class="ms-3 text-start">
@@ -25,7 +25,7 @@
                                         {{ page.category || "Facebook Page" }}
                                     </h5>
                                     <p class="text-muted small mb-0">
-                                        ID: {{ page.id }}
+                                        PAGE ID: {{ page.channel_id }}
                                     </p>
                                 </div>
                             </div>

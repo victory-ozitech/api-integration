@@ -27,7 +27,7 @@ class FacebookAuthController extends Controller
     $channels = Channel::where('user_id', 1)
         ->where('facebook_account_id', $facebookAccount->id)
         ->get();
-        return $channels;
+        // return $channels;
 
     return Inertia::render('User/Facebook/ConnectPage', [
         'facebookAccount' => $facebookAccount,
