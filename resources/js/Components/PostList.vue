@@ -5,10 +5,10 @@ const props = defineProps({
     posts: Array
 });
 
-const emit = defineEmits(["delete-posts"]);
+const emit = defineEmits(["deletePosts"]);
 
-const handleDeletePost = () => {
-    emit("delete-posts");
+const handleDeletePost = (postId) => {
+    emit("deletePosts", postId);
 };
 </script>
 

@@ -120,8 +120,8 @@ const openEditModal = (post) => {
     showScheduledPostsModal.value = false;
 };
 
-const handleDeletePost = () => {
-    router.get(route("posts.delete"), {
+const handleDeletePost = (postId) => {
+    router.delete(route("posts.destroy", postId), {
         onSuccess: () => {
             console.log("✅ Posts deleted successfully");
         },
