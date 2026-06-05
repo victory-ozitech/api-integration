@@ -101,6 +101,7 @@ const loading = ref(false)
 
 
 const disconnect = (id) => {
+    if (!confirm("Disconnect this page?")) return;
     if (loading.value) return
 
     router.delete(route('facebook.disconnect-page', id), {

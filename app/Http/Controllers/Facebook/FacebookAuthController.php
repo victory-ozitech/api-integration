@@ -27,7 +27,7 @@ class FacebookAuthController extends Controller
     $channels = Channel::where('user_id', 1)
         ->where('facebook_account_id', $facebookAccount->id)
         ->get();
-        // return $channels;
+        // dd($channels);
 
     return Inertia::render('User/Facebook/ConnectPage', [
         'facebookAccount' => $facebookAccount,
@@ -106,7 +106,7 @@ class FacebookAuthController extends Controller
         $pages = $pagesResponse->json()['data'] ?? [];
 
         foreach ($pages as $page) {
-            Channel::updateOrCreate(
+            $channel = Channel::updateOrCreate(
                 [
                     'user_id'    => 1,
                     'channel_id' => $page['id'],
@@ -119,6 +119,10 @@ class FacebookAuthController extends Controller
                     'avatar'              => $page['picture']['data']['url'] ?? null,
                 ]
             );
+
+            PostChannel::whereNull('channel_id')
+            ->where('page_id', $page['id'])
+            ->update(['channel_id' => $channel->id]);
         }
 
         return redirect()->route('facebook.connect')
@@ -137,7 +141,7 @@ class FacebookAuthController extends Controller
    public function disconnectChannel( $id)
     {
         $channel = Channel::where('user_id', 1)
-        ->where('channel_id', $id) // channel_id is the Facebook page ID
+        ->where('id', $id) // channel_id is the Facebook page ID
         ->first();
         
         if (!$channel) {
@@ -145,7 +149,9 @@ class FacebookAuthController extends Controller
         }
             
         // Delete associated post channels
-        PostChannel::where('channel_id', $channel->id)->delete();
+        PostChannel::where('channel_id', $channel->id)->update([
+            'channel_id' => null
+        ]);
 
         // Delete the channel
         $channel->delete();

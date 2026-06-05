@@ -248,6 +248,8 @@ class FacebookPostController extends Controller
             PostChannel::create([
                 'schedule_post_id' => $post->id,
                 'channel_id'       => $channel->id,
+                'page_id'          => $channel->channel_id, // Facebook page ID for relinking
+                'platform'         => 'facebook',
                 'status'           => $isScheduled ? 'pending' : 'published',
             ]);
         }
