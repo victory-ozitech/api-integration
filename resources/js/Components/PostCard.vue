@@ -167,24 +167,16 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { deletePost } from "@/utils/postUtils";
-
 const props = defineProps({
     post: Object
 });
 
-// onMounted(() => {
-//     console.log("Loaded post:", props.post);
-// });
-
-const emit = defineEmits(["refresh"]);
+const emit = defineEmits(["deletePost"]);
 
 const remove = () => {
     if (!confirm("Delete this post?")) return;
 
-    deletePost(props.post.id);
-    emit("refresh");
+    emit("deletePost");
 };
 
 const formatDate = (date) => {
