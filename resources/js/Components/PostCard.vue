@@ -97,7 +97,7 @@
                         <div class="four-grid">
                             <img v-for="(file, i) in props.post.media.slice(0, 4)" :key="i" :src="getMediaUrl(file)" />
                             <div v-if="props.post.media.length > 4" class="overlay">+{{ props.post.media.length - 4
-                                }}
+                            }}
                             </div>
                         </div>
                     </template>
@@ -147,12 +147,16 @@
 
             <div class="actions-row">
 
-                <a v-if="props.post?.is_scheduled" :href="route('posts.edit', { id: props.post.id })" class="action-btn">
+                <a v-if="props.post?.is_scheduled" :href="route('posts.edit', { id: props.post.id })"
+                    class="action-btn">
                     <i class="fa-regular fa-pen-to-square"></i>
                 </a>
 
-                        <a v-else class="view-post-btn action-btn" href="#" target="_blank" rel="noopener noreferrer"><i
-                                class="fa-solid fa-up-right-from-square"></i> View Post</a>
+                <a v-else class="view-post-btn action-btn" :href="route('posts.show', { id: props.post.id })"
+                    target="_blank" rel="noopener noreferrer">
+                    <i class="fa-solid fa-up-right-from-square"></i>
+                    <span>View Post</span>
+                </a>
 
 
                 <button class="action-btn delete" @click="remove">
@@ -167,24 +171,16 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { deletePost } from "@/utils/postUtils";
-
 const props = defineProps({
     post: Object
 });
 
-// onMounted(() => {
-//     console.log("Loaded post:", props.post);
-// });
-
-const emit = defineEmits(["refresh"]);
+const emit = defineEmits(["deletePost"]);
 
 const remove = () => {
     if (!confirm("Delete this post?")) return;
 
-    deletePost(props.post.id);
-    emit("refresh");
+    emit("deletePost", props.post.id);
 };
 
 const formatDate = (date) => {
@@ -595,6 +591,10 @@ const getMediaUrl = (media) => {
                 gap: 2px;
                 position: relative;
 
+                img{
+                    height: 100px;
+                }
+
                 >div {
                     overflow: hidden;
                     border-radius: 24px;
@@ -657,17 +657,173 @@ const getMediaUrl = (media) => {
             display: flex;
             gap: 10px;
 
+            // .view-post-btn {
+            //     overflow: hidden;
+            //     position: relative;
+            //     display: inline-flex;
+            //     align-items: center;
+            //     gap: 0.25rem;
+
+            //     transition: all 0.3s ease;
+
+            //     i {
+            //         transition: transform 0.3s ease;
+            //     }
+
+            //     span {
+            //         opacity: 0;
+            //         transform: translateX(-5px);
+            //         max-width: 0;
+            //         overflow: hidden;
+            //         white-space: nowrap;
+
+            //         transition:
+            //             opacity 0.25s ease,
+            //             transform 0.25s ease,
+            //             max-width 0.3s ease;
+            //     }
+
+            //     &:hover {
+            //         padding: 4px 10px;
+            //     }
+
+            //     &:hover i {
+            //         transform: translateX(-2px);
+            //     }
+
+            //     &:hover span {
+            //         opacity: 1;
+            //         transform: translateX(0);
+            //         max-width: 120px; // adjust based on text length
+            //     }
+            // }
+
+            // .view-post-btn {
+            //     position: relative;
+            //     display: inline-flex;
+            //     align-items: center;
+            //     gap: 0.4rem;
+
+            //     height: 42px;
+            //     min-width: 42px;
+            //     width: 42px;
+            //     padding: 0 12px;
+
+            //     overflow: hidden;
+
+            //     transition: background 0.3s ease, transform 0.25s ease;
+
+            //     i {
+            //         transition: transform 0.3s ease;
+            //         z-index: 2;
+            //     }
+
+            //     span {
+            //         position: absolute;
+            //         left: 50%;
+            //         transform: translateX(-40%) scale(0.95);
+            //         opacity: 0;
+
+            //         white-space: nowrap;
+
+            //         transition:
+            //             opacity 0.25s ease,
+            //             transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            //     }
+
+            //     &:hover i {
+            //         transform: translateX(-6px);
+            //     }
+
+            //     &:hover span {
+            //         opacity: 1;
+            //         transform: translateX(10px) scale(1);
+            //     }
+            // }
+
             .view-post-btn {
-                padding: 8px 14px;
-                width: max-content !important;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                height: 42px;
+                width: 42px;
+                padding: 0 12px;
+                border: none;
+                border-radius: 14px;
+                background: rgba(255, 255, 255, 0.7);
+                color: #334155;
+                text-decoration: none;
+                transition: width 0.3s ease, background 0.3s ease;
+                box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+
+                i {
+                    font-size: 18px;
+                    flex-shrink: 0;
+                    /* ✅ Icon stays visible */
+                }
+
+                span {
+                    opacity: 0;
+                    width: 0;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    transition: opacity 0.3s ease, width 0.3s ease;
+                }
 
                 &:hover {
-                    background: rgba(59, 130, 246, .2);
+                    gap: 8px;
+                    width: 130px;
+                    background: white;
+
+                    span {
+                        opacity: 1;
+                        width: auto;
+                    }
                 }
             }
 
+
+
+
             .action-btn {
-                width: 42px;
+                min-width: 42px;
+                height: 42px;
+
+                border: none;
+                border-radius: 14px;
+
+                background:
+                    rgba(255, 255, 255, .7);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                color: #334155;
+
+                text-decoration: none;
+
+                transition: all .25s ease;
+
+                box-shadow:
+                    0 6px 18px rgba(15, 23, 42, .05);
+
+                &:hover {
+                    transform: translateY(-2px);
+
+                    background: white;
+                }
+
+                &delete:hover {
+                    color: #ef4444;
+                }
+            }
+
+
+
+
+            .action-btn {
+                min-width: 42px;
                 height: 42px;
 
                 border: none;

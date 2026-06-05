@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('post_channels', function (Blueprint $table) {
             $table->id();
             $table->foreignId('schedule_post_id')->constrained()->onDelete('cascade');
-            $table->foreignId('channel_id')->constrained()->onDelete('cascade');
+            $table->foreignId('channel_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('platform')->nullable();
             $table->string('facebook_post_id')->nullable();
-            $table->enum('status', ['pending', 'published', 'failed'])->default('pending');
+            $table->string('page_id')->nullable();
+            $table->enum('status', ['pending', 'published', 'failed', 'deleted_on_platform'])->default('pending');
             $table->timestamps();
         });
     }

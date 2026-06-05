@@ -19,10 +19,14 @@ class DashBoardController extends Controller
     {
         $channels = Channel::where('user_id', 1)
             ->get();
-        $posts = SchedulePost::where('user_id', 1)
-            ->with(['channels.channel', 'media'])
-            ->latest()
-            ->get();
+       $posts = SchedulePost::where('user_id', 1)
+        ->with(['channels' => function ($query) {
+            $query->with('channel'); // don't filter out null channels
+        }, 'media'])
+        ->latest()
+        ->get();
+
+        // return $posts;
 
         return Inertia::render('User/Posts/Index', [
             'channels' => $channels,

@@ -24,13 +24,14 @@ Route::controller(FacebookAuthController::class)->group(function () {
     Route::get('/auth/facebook', 'redirectToFacebook')->name('facebook.redirect');
     Route::get('/auth/facebook/callback', 'handleCallback')->name('facebook.callback');
     Route::post('/auth/facebook/select-page', 'selectedPage')->name('facebook.select-page');
-    Route::post('/auth/facebook/disconnect-page', 'disconnectPage')->name('facebook.disconnect-page');
+    Route::delete('/auth/facebook/disconnect-page/{id}', 'disconnectChannel')->name('facebook.disconnect-page');
 });
 
 // Posts
 Route::controller(FacebookPostController::class)->group(function () {
     Route::get('/posts', 'index')->name('posts.index');
     Route::post('/posts', 'store')->name('posts.store');
+    Route::get('/posts/{post}', 'viewOnFacebook')->name('posts.show');
     Route::put('/posts/{post}', 'update')->name('posts.update');
     Route::delete('/posts/{post}', 'destroy')->name('posts.destroy');
 });

@@ -24,7 +24,7 @@
 
             <!-- Content -->
             <div v-if="view === 'list'">
-                <PostList :posts="props.posts" :currentDate="currentDate" @onLoadPosts="loadPosts" />
+                <PostList :posts="props.posts" :currentDate="currentDate" @deletePosts="handleDeletePost" />
             </div>
 
             <div v-else>
@@ -120,8 +120,15 @@ const openEditModal = (post) => {
     showScheduledPostsModal.value = false;
 };
 
-const loadPosts = () => {
-    router.get(route("posts.index"));
+const handleDeletePost = (postId) => {
+    router.delete(route("posts.destroy", postId), {
+        onSuccess: () => {
+            console.log("✅ Posts deleted successfully");
+        },
+        onError: (err) => {
+            console.log("❌ Failed to delete posts", err);
+        },
+    });
 };
 
 

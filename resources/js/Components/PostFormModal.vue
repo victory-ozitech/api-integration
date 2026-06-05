@@ -399,6 +399,7 @@ const isEditMode = computed(() => {
 
 // formChannel
 const formChannels = computed(() => {
+    if (!props.post) return null;  
     if (!form.channels?.length) return null;
 
     // console.log('Post prop: ', props.post);
@@ -414,7 +415,7 @@ const formChannels = computed(() => {
     //     // .filter(c => selectedIds.includes(c.id))
     //     .map(c => c.channel));
 
-    return props.availableChannels
+    return props.post.channels
         .filter(c => selectedIds.includes(c.channel_id))
         // .filter(c => selectedIds.includes(c.id))
         .map(c => c.channel);

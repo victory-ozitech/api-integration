@@ -65,6 +65,33 @@ class FacebookPostController extends Controller
         );
     }
 
+   public function viewOnFacebook(SchedulePost $post)
+{
+    $post->load('channels');
+
+    $postChannel = $post->channels
+        ->where('status', 'published')
+        ->whereNotNull('facebook_post_id')
+        ->first();
+
+    if (!$postChannel || !$postChannel->facebook_post_id) {
+        return back()->with('error', 'This post has not been published to Facebook yet.');
+    }
+
+    $facebookPostId = $postChannel->facebook_post_id;
+
+    if (str_contains($facebookPostId, '_')) {
+        $parts  = explode('_', $facebookPostId);
+        $pageId = $parts[0];
+        $postId = $parts[1];
+        $url    = "https://www.facebook.com/{$pageId}/posts/{$postId}";
+    } else {
+        $url = "https://www.facebook.com/photo/?fbid={$facebookPostId}";
+    }
+
+    return redirect()->away($url);
+}
+
     public function update(Request $request, SchedulePost $post)
     {
         $request->validate([
@@ -221,6 +248,8 @@ class FacebookPostController extends Controller
             PostChannel::create([
                 'schedule_post_id' => $post->id,
                 'channel_id'       => $channel->id,
+                'page_id'          => $channel->channel_id, // Facebook page ID for relinking
+                'platform'         => 'facebook',
                 'status'           => $isScheduled ? 'pending' : 'published',
             ]);
         }

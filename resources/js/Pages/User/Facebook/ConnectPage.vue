@@ -17,7 +17,7 @@
 
                             <div class="profile d-flex align-items-center mt-3">
                                 <div class="avatar-ring">
-                                    <img :src="page.picture?.data?.url || ''" class="avatar" />
+                                    <img :src="page.avatar || ''" class="avatar" />
                                 </div>
 
                                 <div class="ms-3 text-start">
@@ -25,12 +25,14 @@
                                         {{ page.category || "Facebook Page" }}
                                     </h5>
                                     <p class="text-muted small mb-0">
-                                        ID: {{ page.id }}
+                                        PAGE ID: {{ page.channel_id }}
                                     </p>
                                 </div>
                             </div>
 
-                              <button class="btn btn-primary mt-4">Disconnect Account</button>
+                            <button class="btn btn-primary mt-4" @click="disconnect(page.id)">
+                                {{ loading ? 'Disconnecting...' : 'Disconnect Account' }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -81,7 +83,7 @@
 
 <script setup>
 import UserLayout from "@/Layouts/UserLayout.vue";
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 
 // Props
 const props = defineProps({
@@ -93,6 +95,20 @@ onMounted(() => {
     console.log("Facebook Account:", props.facebookAccount);
     console.log("Pages:", props.pages);
 });
+
+
+const loading = ref(false)
+
+
+const disconnect = (id) => {
+    if (!confirm("Disconnect this page?")) return;
+    if (loading.value) return
+
+    router.delete(route('facebook.disconnect-page', id), {
+        onStart: () => loading.value = true,
+        onFinish: () => loading.value = false,
+    })
+}
 </script>
 
 <style lang="scss" scoped>

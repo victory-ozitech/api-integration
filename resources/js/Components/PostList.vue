@@ -5,10 +5,10 @@ const props = defineProps({
     posts: Array
 });
 
-const emit = defineEmits(["load-posts"]);
+const emit = defineEmits(["deletePosts"]);
 
-const handleRefresh = () => {
-    emit("load-posts");
+const handleDeletePost = (postId) => {
+    emit("deletePosts", postId);
 };
 </script>
 
@@ -25,7 +25,7 @@ const handleRefresh = () => {
         <template v-else>
             <div class="col-md-6 col-lg-4 mb-4" v-for="(post, index) in props.posts" :key="post.id"
                 :style="{ animationDelay: `${index * 80}ms` }">
-                <PostCard :post="post" @refresh="handleRefresh" />
+                <PostCard :post="post" @deletePost="handleDeletePost" />
             </div>
         </template>
     </div>

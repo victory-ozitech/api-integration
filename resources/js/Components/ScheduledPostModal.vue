@@ -157,8 +157,11 @@
                             <i class="fa-regular fa-pen-to-square"></i>
                         </button>
 
-                        <a v-else class="view-post-btn action-btn" href="#" target="_blank" rel="noopener noreferrer"><i
-                                class="fa-solid fa-up-right-from-square"></i> View Post</a>
+                <a v-else class="view-post-btn action-btn" :href="route('posts.show', { id: props.post.id })"
+                    target="_blank" rel="noopener noreferrer">
+                    <i class="fa-solid fa-up-right-from-square"></i>
+                    <span>View Post</span>
+                </a>
 
                         <button @click="addNew" class="action-btn">
                             <i class="fa-solid fa-plus"></i>
@@ -717,17 +720,54 @@ const closeModal = () => {
             display: flex;
             gap: 10px;
 
+            
+
             .view-post-btn {
-                padding: 8px 14px;
-                width: max-content !important;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                height: 42px;
+                width: 42px;
+                padding: 0 12px;
+                border: none;
+                border-radius: 14px;
+                background: rgba(255, 255, 255, 0.7);
+                color: #334155;
+                text-decoration: none;
+                transition: width 0.3s ease, background 0.3s ease;
+                box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+
+                i {
+                    font-size: 18px;
+                    flex-shrink: 0;
+                    /* ✅ Icon stays visible */
+                }
+
+                span {
+                    opacity: 0;
+                    width: 0;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    transition: opacity 0.3s ease, width 0.3s ease;
+                }
 
                 &:hover {
-                    background: rgba(59, 130, 246, .2);
+                    gap: 8px;
+                    width: 130px;
+                    background: white;
+
+                    span {
+                        opacity: 1;
+                        width: auto;
+                    }
                 }
             }
 
+
+
+
             .action-btn {
-                width: 42px;
+                min-width: 42px;    
                 height: 42px;
 
                 border: none;

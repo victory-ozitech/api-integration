@@ -11,6 +11,7 @@ class PostChannel extends Model
         'channel_id',
         'platform',
         'facebook_post_id',
+        'page_id',
         'status',
     ];
 
