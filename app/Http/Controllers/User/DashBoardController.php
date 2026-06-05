@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Channel;
+use App\Models\SchedulePost;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -18,8 +19,14 @@ class DashBoardController extends Controller
     {
         $channels = Channel::where('user_id', 1)
             ->get();
+        $posts = SchedulePost::where('user_id', 1)
+            ->with(['channels.channel', 'media'])
+            ->latest()
+            ->get();
+
         return Inertia::render('User/Posts/Index', [
-            'channels' => $channels
+            'channels' => $channels,
+            'posts' => $posts
         ]);
     }
 
@@ -32,13 +39,15 @@ class DashBoardController extends Controller
         ]);
     }
 
-    public function edit(string $id)
+    public function edit(SchedulePost $post)
     {
-        $channels = Channel::where('user_id', 1)
-            ->get();
+        $post->load(['media', 'channels.channel']);
+
+        // return $post;
+        // $channels = Channel::where('user_id', 1)->get();
         return Inertia::render('User/Posts/Edit', [
-            'id' => $id,
-            'channels' => $channels
+            'post'     => $post,
+            // 'channels' => $channels,
         ]);
     }
 

@@ -2,9 +2,7 @@
     <div class="modal-overlay" @click.self="closeModal">
         <div class="modal-content">
             <!-- Modal Header -->
-
-
-            <div class="premium-card">
+            <div class="premium-card d-flex flex-column">
 
                 <!-- Glow -->
                 <div class="card-glow"></div>
@@ -14,70 +12,122 @@
 
                     <div class="user-block">
 
-                        <div class="avatar-ring">
-                            <img :src="post.user_avatar" class="avatar" />
+                        <div class="channels-stack">
+                            <div v-for="(item, index) in props.post.channels.slice(0, 3)" :key="item.id"
+                                class="channel-avatar" :style="{ zIndex: 10 - index }">
+                                <img :src="item.channel.avatar" />
+                            </div>
+
+                            <div v-if="props.post.channels.length > 3" class="channel-more">
+                                +{{ props.post.channels.length - 3 }}
+                            </div>
                         </div>
 
                         <div>
                             <div class="user-name">
-                                {{ post.user_name }}
+                                {{ props.post.channels[0].channel.channel_name }}
                             </div>
 
                             <div class="post-date">
                                 <i class="fa-regular fa-clock"></i>
-                                {{ formatDate(post.created_at) }}
+                                {{ formatDate(props.post.scheduled_at ?? '') }}
                             </div>
                         </div>
 
                     </div>
 
-                    <div class="d-flex gap-2">
-                        <div class="status-pill" :class="post.status">
-                            {{ post.status }}
-                        </div>
-
-                        <button class="close-btn" @click="closeModal">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <div class="status-pill" :class="props.post.status">
+                        {{ props.post.status }}
                     </div>
 
                 </div>
 
                 <!-- Content -->
                 <div class="post-content">
-                    {{ post.content }}
+                    {{ props.post.message }}
                 </div>
+
 
                 <!-- Media -->
                 <div class="media-shell">
+                    <!-- If no media -->
+                    <div v-if="!props.post.media || props.post.media?.length === 0" class="default-preview">
+                        <div class="image-placeholder">
 
-                    <img v-if="post.image && !imageError" :src="post.image" class="post-image"
-                        @error="imageError = true" />
+                            <div class="placeholder-orb"></div>
 
-                    <!-- Elegant Placeholder -->
-                    <div v-else class="image-placeholder">
+                            <div class="placeholder-content">
 
-                        <div class="placeholder-orb"></div>
+                                <div class="placeholder-icon">
+                                    <i class="fa-regular fa-image"></i>
+                                </div>
 
-                        <div class="placeholder-content">
+                                <div class="placeholder-title">
+                                    No Media Preview
+                                </div>
 
-                            <div class="placeholder-icon">
-                                <i class="fa-regular fa-image"></i>
-                            </div>
+                                <div class="placeholder-subtitle">
+                                    Visual content will appear here
+                                </div>
 
-                            <div class="placeholder-title">
-                                No Media Preview
-                            </div>
-
-                            <div class="placeholder-subtitle">
-                                Visual content will appear here
                             </div>
 
                         </div>
-
                     </div>
+                    <template v-if="props.post.media?.length && props.post.media?.every(isImage)">
+                        <!-- If multiple images -->
+                        <div v-if="props.post.media?.length" class="media-grid">
+                            <template v-if="props.post.media.length === 1">
+                                <img :src="getMediaUrl(props.post.media[0])" class="single-media" />
+                            </template>
 
+                            <template v-else-if="props.post.media.length === 2">
+                                <div class="two-grid">
+                                    <img v-for="(file, i) in props.post.media" :key="i" :src="getMediaUrl(file)" />
+                                </div>
+                            </template>
+
+                            <template v-else-if="props.post.media.length === 3">
+                                <div class="three-grid">
+                                    <img :src="getMediaUrl(props.post.media[0])" class="large" />
+                                    <div class="two-small">
+                                        <img v-for="(file, i) in props.post.media.slice(1)" :key="i"
+                                            :src="getMediaUrl(file)" />
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template v-else>
+                                <div class="four-grid">
+                                    <img v-for="(file, i) in props.post.media.slice(0, 4)" :key="i"
+                                        :src="getMediaUrl(file)" />
+                                    <div v-if="props.post.media.length > 4" class="overlay">+{{ props.post.media.length
+                                        - 4
+                                    }}
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template v-else-if="props.post.media?.length && props.post.media?.every(isVideo)">
+                        <template v-if="props.post.media?.length">
+                            <template v-for="media in props.post.media" :key="media.url">
+                                <!-- If video -->
+                                <div v-if="isVideo(media)">
+                                    <video class="post-video" controls>
+                                        <source :src="media.url" :type="media.type" />
+                                        Your browser does not support video playback.
+                                    </video>
+                                    🎥 Video
+                                </div>
+                            </template>
+                        </template>
+                    </template>
+                    <template v-else>
+                        <div class="mixed-warning">Mixed media not supported in preview</div>
+                    </template>
                 </div>
+
 
                 <!-- Footer -->
                 <div class="card-footer-custom">
@@ -86,25 +136,29 @@
 
                         <div class="stat-item">
                             <i class="fa-regular fa-heart"></i>
-                            <span>{{ post.likes_count }}</span>
+                            <span>{{ props.post.likes_count ?? 3 }}</span>
                         </div>
 
                         <div class="stat-item">
                             <i class="fa-regular fa-comment"></i>
-                            <span>{{ post.comments_count }}</span>
+                            <span>{{ props.post.comments_count ?? 3 }}</span>
                         </div>
 
                         <div class="stat-item">
                             <i class="fa-solid fa-retweet"></i>
-                            <span>{{ post.shares_count }}</span>
+                            <span>{{ props.post.shares_count ?? 3 }}</span>
                         </div>
 
                     </div>
 
+
                     <div class="actions-row">
-                        <button class="action-btn" @click.stop="editPost(post)">
+                        <button v-if="props.post?.is_scheduled" class="action-btn" @click.stop="editPost(post)">
                             <i class="fa-regular fa-pen-to-square"></i>
                         </button>
+
+                        <a v-else class="view-post-btn action-btn" href="#" target="_blank" rel="noopener noreferrer"><i
+                                class="fa-solid fa-up-right-from-square"></i> View Post</a>
 
                         <button @click="addNew" class="action-btn">
                             <i class="fa-solid fa-plus"></i>
@@ -120,7 +174,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted } from 'vue';
 
 
 // Props
@@ -130,24 +184,58 @@ const props = defineProps({
         type: Date,
         default: '',
         required: true,
-        // type: Object,
-        // default: () => { },
-        // required: true,
     },
 });
 
+onMounted(() => {
+    console.log("Post for Modal:", props.post);
+})
 
-const imageError = ref(false);
 
 
 // Utility Methods
+
 const formatDate = (date) => {
+    if (!date) return "Not scheduled";
+
+    const parsedDate = new Date(date.replace(" ", "T"));
+
+    if (isNaN(parsedDate.getTime())) return "Invalid date";
+
     return new Intl.DateTimeFormat("en-US", {
         month: "short",
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
-    }).format(new Date(date));
+    }).format(parsedDate);
+};
+
+const isImage = (media) => {
+    const type = media?.mime_type || media?.type || '';
+    return type.includes('image');
+};
+
+const isVideo = (media) => {
+    const type = media?.mime_type || media?.type || '';
+    return type.includes('video');
+};
+
+const getMediaUrl = (media) => {
+    try {
+        if (media.file_path) {
+            return media.file_path.startsWith('/')
+                ? media.file_path
+                : `/${media.file_path}`;
+        }
+
+        if (typeof File !== 'undefined' && media instanceof File) {
+            return URL.createObjectURL(media);
+        }
+    } catch (e) {
+        console.warn('Error getting media URL:', e);
+    }
+
+    return '';
 };
 
 // Emit
@@ -211,7 +299,6 @@ const closeModal = () => {
     cursor: pointer;
 }
 
-
 .premium-card {
     position: relative;
 
@@ -232,298 +319,447 @@ const closeModal = () => {
         transform .35s ease,
         box-shadow .35s ease;
 
-    // height: 100%;
-}
 
-.premium-card:hover {
-    transform: translateY(-6px);
+    &:hover {
+        transform: translateY(-6px);
+
+        box-shadow:
+            0 24px 60px rgba(15, 23, 42, 0.12);
+    }
+
+
+    /* Ambient glow */
+    .card-glow {
+        position: absolute;
+
+        width: 220px;
+        height: 220px;
+
+        background:
+            radial-gradient(circle,
+                rgba(52, 211, 153, .18),
+                transparent 70%);
+
+        top: -80px;
+        right: -80px;
+
+        pointer-events: none;
+    }
+
+    /* Header */
+    .card-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+
+        margin-bottom: 18px;
+
+        @media (max-width: 350px) {
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .user-block {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-direction: column;
+
+            .channels-stack {
+                display: flex;
+                align-items: center;
+                position: relative;
+
+                .channel-avatar {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    overflow: hidden;
+                    border: 3px solid white;
+                    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+                    position: relative;
+                    z-index: 10;
+
+                    margin-left: -16px;
+                    /* More overlap */
+                    transition: transform 0.25s ease;
+
+                    &:first-child {
+                        margin-left: 0;
+                        z-index: 20;
+                    }
+
+                    &:hover {
+                        transform: translateY(-4px) scale(1.05);
+                        z-index: 30;
+                    }
+
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        display: block;
+                    }
+                }
+
+                .channel-more {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    margin-left: -16px;
+                    background: linear-gradient(135deg, #10b981, #34d399);
+                    color: white;
+                    font-size: 12px;
+                    font-weight: 700;
+                    border: 3px solid white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+                    z-index: 5;
+                }
+            }
+
+            .user-name {
+                font-weight: 700;
+                color: #0f172a;
+                font-size: 15px;
+            }
 
-    box-shadow:
-        0 24px 60px rgba(15, 23, 42, 0.12);
-}
+            .post-date {
+                color: #64748b;
+                font-size: 13px;
 
-/* Ambient glow */
-.card-glow {
-    position: absolute;
+                display: flex;
+                align-items: center;
+                gap: 6px;
 
-    width: 220px;
-    height: 220px;
+                margin-top: 4px;
+            }
+        }
 
-    background:
-        radial-gradient(circle,
-            rgba(52, 211, 153, .18),
-            transparent 70%);
+        /* Status */
+        .status-pill {
+            padding: 8px 14px;
 
-    top: -80px;
-    right: -80px;
+            border-radius: 999px;
 
-    pointer-events: none;
-}
+            font-size: 11px;
+            font-weight: 700;
 
-/* Header */
-.card-header-custom {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+            text-transform: uppercase;
+            letter-spacing: .6px;
 
-    margin-bottom: 18px;
-}
+            &.draft {
+                background: rgba(148, 163, 184, .12);
+                color: #64748b;
+            }
 
-.user-block {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
+            &.scheduled {
+                background: rgba(251, 191, 36, .12);
+                color: #d97706;
+            }
 
-.avatar-ring {
-    padding: 2px;
+            &.published {
+                background: rgba(16, 185, 129, .12);
+                color: #059669;
+            }
+        }
+    }
 
-    border-radius: 50%;
+    /* Content */
+    .post-content {
+        font-size: 16px;
+        line-height: 1.9;
 
-    background:
-        linear-gradient(135deg,
-            #d1fae5,
-            #a7f3d0);
-}
+        color: #0f172a;
 
-.avatar {
-    width: 50px;
-    height: 50px;
+        margin-bottom: 20px;
 
-    border-radius: 50%;
-    object-fit: cover;
+        font-weight: 500;
+    }
 
-    display: block;
+    /* Media */
+    .mixed-warning {
+        margin-left: 5%;
+        color: #ff0000;
+    }
 
-    border: 3px solid white;
-}
+    .media-shell {
+        position: relative;
+        margin-bottom: 22px;
+        flex-grow: 1; // media takes remaining height
+        display: flex;
+        flex-direction: column;
+        max-height: 350px;
+        max-width: 350px;
 
-.user-name {
-    font-weight: 700;
-    color: #0f172a;
-    font-size: 15px;
-}
+        /* Placeholder */
+        .image-placeholder {
+            position: relative;
 
-.post-date {
-    color: #64748b;
-    font-size: 13px;
+            height: 250px;
 
-    display: flex;
-    align-items: center;
-    gap: 6px;
+            border-radius: 24px;
+
+            overflow: hidden;
 
-    margin-top: 4px;
-}
-
-/* Status */
-.status-pill {
-    padding: 8px 14px;
-
-    border-radius: 999px;
-
-    font-size: 11px;
-    font-weight: 700;
-
-    text-transform: uppercase;
-    letter-spacing: .6px;
-}
-
-.status-pill.draft {
-    background: rgba(148, 163, 184, .12);
-    color: #64748b;
-}
-
-.status-pill.scheduled {
-    background: rgba(251, 191, 36, .12);
-    color: #d97706;
-}
-
-.status-pill.published {
-    background: rgba(16, 185, 129, .12);
-    color: #059669;
-}
-
-/* Content */
-.post-content {
-    font-size: 16px;
-    line-height: 1.9;
-
-    color: #0f172a;
-
-    margin-bottom: 20px;
-
-    font-weight: 500;
-}
-
-/* Media */
-.media-shell {
-    position: relative;
-    margin-bottom: 22px;
-}
-
-.post-image,
-.image-placeholder {
-    width: 100%;
-    height: 250px;
-
-    border-radius: 24px;
-}
-
-.post-image {
-    object-fit: cover;
-
-    display: block;
-
-    box-shadow:
-        0 10px 30px rgba(15, 23, 42, .10);
-
-    transition:
-        transform .5s ease;
-}
-
-.post-image:hover {
-    transform: scale(1.02);
-}
-
-/* Placeholder */
-.image-placeholder {
-    position: relative;
-
-    overflow: hidden;
-
-    background:
-        linear-gradient(145deg,
-            rgba(255, 255, 255, .7),
-            rgba(240, 253, 244, .95));
-
-    border:
-        1px solid rgba(255, 255, 255, .7);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.placeholder-orb {
-    position: absolute;
-
-    width: 180px;
-    height: 180px;
-
-    background:
-        radial-gradient(circle,
-            rgba(52, 211, 153, .18),
-            transparent 70%);
-
-    border-radius: 50%;
-}
-
-.placeholder-content {
-    position: relative;
-    z-index: 2;
-
-    text-align: center;
-}
-
-.placeholder-icon {
-    width: 72px;
-    height: 72px;
-
-    margin: 0 auto 14px;
-
-    border-radius: 24px;
-
-    background:
-        rgba(255, 255, 255, .75);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 28px;
-
-    color: #10b981;
-
-    box-shadow:
-        0 10px 30px rgba(16, 185, 129, .12);
-}
-
-.placeholder-title {
-    font-weight: 700;
-    color: #0f172a;
-
-    margin-bottom: 6px;
-}
-
-.placeholder-subtitle {
-    color: #64748b;
-    font-size: 14px;
-}
-
-/* Footer */
-.card-footer-custom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.stats-row {
-    display: flex;
-    gap: 18px;
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    color: #475569;
-
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.stat-item i {
-    color: #94a3b8;
-}
-
-/* Actions */
-.actions-row {
-    display: flex;
-    gap: 10px;
-}
-
-.action-btn {
-    width: 42px;
-    height: 42px;
-
-    border: none;
-    border-radius: 14px;
-
-    background:
-        rgba(255, 255, 255, .7);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #334155;
-
-    text-decoration: none;
-
-    transition: all .25s ease;
-
-    box-shadow:
-        0 6px 18px rgba(15, 23, 42, .05);
-}
-
-.action-btn:hover {
-    transform: translateY(-2px);
-
-    background: white;
-}
-
-.action-btn.delete:hover {
-    color: #ef4444;
+            background:
+                linear-gradient(145deg,
+                    rgba(255, 255, 255, .7),
+                    rgba(240, 253, 244, .95));
+
+            border:
+                1px solid rgba(255, 255, 255, .7);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .placeholder-orb {
+                position: absolute;
+
+                width: 180px;
+                height: 180px;
+
+                background:
+                    radial-gradient(circle,
+                        rgba(52, 211, 153, .18),
+                        transparent 70%);
+
+                border-radius: 50%;
+            }
+
+            .placeholder-content {
+                position: relative;
+                z-index: 2;
+
+                text-align: center;
+
+                .placeholder-icon {
+                    width: 72px;
+                    height: 72px;
+
+                    margin: 0 auto 14px;
+
+                    border-radius: 24px;
+
+                    background:
+                        rgba(255, 255, 255, .75);
+
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    font-size: 28px;
+
+                    color: #10b981;
+
+                    box-shadow:
+                        0 10px 30px rgba(16, 185, 129, .12);
+                }
+
+                .placeholder-title {
+                    font-weight: 700;
+                    color: #0f172a;
+
+                    margin-bottom: 6px;
+                }
+
+                .placeholder-subtitle {
+                    color: #64748b;
+                    font-size: 14px;
+                }
+            }
+        }
+
+        .media-grid {
+            display: grid;
+            gap: 4px;
+            border-radius: 24px;
+            max-height: 350px;
+            overflow: hidden; // Make sure children respect radius
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+                border-radius: 0; // Rounded corners handled by parent wrapper
+            }
+
+            .two-grid,
+            .three-grid,
+            .four-grid {
+                display: grid;
+            }
+
+            .single-media,
+            .two-grid>div,
+            .three-grid .large,
+            .three-grid .two-small>div,
+            .four-grid>div {
+                border-radius: 0;
+                overflow: hidden;
+            }
+
+            /* 1 image */
+            .single-media {
+                width: 100%;
+                // height: 350px;
+                border-radius: 24px;
+                overflow: hidden;
+            }
+
+            /* 2 images */
+            .two-grid {
+                grid-template-columns: 1fr 1fr;
+
+                >div {
+                    overflow: hidden;
+                    border-radius: 24px;
+                    // height: 350px;
+                }
+            }
+
+            /* 3 images */
+            .three-grid {
+                grid-template-columns: 2fr 1fr;
+                grid-template-rows: 1fr 1fr;
+                gap: 2px;
+
+                .large {
+                    grid-row: span 2;
+                    overflow: hidden;
+                    border-radius: 24px 0 0 24px;
+                }
+
+                .two-small {
+                    display: grid;
+                    grid-template-rows: 1fr 1fr;
+                    gap: 2px;
+
+                    >div {
+                        overflow: hidden;
+                        border-radius: 0 24px 24px 0;
+                    }
+                }
+            }
+
+            /* 4+ images */
+            .four-grid {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr 1fr;
+                gap: 2px;
+                position: relative;
+
+                >div {
+                    overflow: hidden;
+                    border-radius: 24px;
+                }
+                img {
+                    height: 100px;
+                }
+
+                .overlay {
+                    position: absolute;
+                    bottom: 8px;
+                    right: 8px;
+                    background: rgba(0, 0, 0, 0.6);
+                    color: #fff;
+                    font-weight: bold;
+                    padding: 6px 10px;
+                    border-radius: 8px;
+                }
+            }
+        }
+
+        .post-video {
+            width: 100%;
+            border-radius: 24px;
+            overflow: hidden;
+            max-height: 250px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .12);
+            margin-bottom: 6px;
+        }
+    }
+
+    /* Footer */
+    .card-footer-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        /* Stats */
+        .stats-row {
+            display: flex;
+            gap: 18px;
+
+            .stat-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+
+                color: #475569;
+
+                font-size: 14px;
+                font-weight: 600;
+
+                i {
+                    color: #94a3b8;
+                }
+            }
+        }
+
+
+        /* Actions */
+        .actions-row {
+            display: flex;
+            gap: 10px;
+
+            .view-post-btn {
+                padding: 8px 14px;
+                width: max-content !important;
+
+                &:hover {
+                    background: rgba(59, 130, 246, .2);
+                }
+            }
+
+            .action-btn {
+                width: 42px;
+                height: 42px;
+
+                border: none;
+                border-radius: 14px;
+
+                background:
+                    rgba(255, 255, 255, .7);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                color: #334155;
+
+                text-decoration: none;
+
+                transition: all .25s ease;
+
+                box-shadow:
+                    0 6px 18px rgba(15, 23, 42, .05);
+
+                &:hover {
+                    transform: translateY(-2px);
+
+                    background: white;
+                }
+
+                &delete:hover {
+                    color: #ef4444;
+                }
+            }
+        }
+    }
 }
 </style>

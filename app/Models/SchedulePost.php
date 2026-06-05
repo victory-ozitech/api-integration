@@ -12,6 +12,7 @@ class SchedulePost extends Model
         'scheduled_at',
         'published_at',
         'status',
+        'is_scheduled'
     ];
     
     public function channels()

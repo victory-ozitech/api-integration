@@ -1,38 +1,41 @@
 ﻿<template>
-    <div class="month-calendar">
-        <div class="calendar-weekdays">
-            <div v-for="label in weekdayLabels" :key="label" class="weekday-label">
-                {{ label }}
-            </div>
-        </div>
-
-        <div class="calendar-grid">
-            <div v-for="(day, i) in monthDays" :key="i" :class="['calendar-cell', { 'calendar-cell--outside': !day.isCurrentMonth, 'calendar-cell--today': isToday(day.date) }
-            ]">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div :class="['date', { 'date--today': isToday(day.date), 'date--outside': !day.isCurrentMonth }]">
-                        {{ day.date.getDate() }}
-                    </div>
-
-                    <button v-if="isFutureOrToday(day.date)" class="add-btn" @click.stop="openModal(day.date)"
-                        title="Schedule New Post">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
+    <div class="calendar-scroll">
+        <div class="month-calendar">
+            <div class="calendar-weekdays">
+                <div v-for="label in weekdayLabels" :key="label" class="weekday-label">
+                    {{ label }}
                 </div>
+            </div>
 
-                <transition-group name="fade" tag="div" class="event-list">
-                    <div v-for="post in getPostsForDate(day.date)" :key="post.id" :title="post.content"
-                        class="post-pill" @click.stop="openPostsModal({post, date: day.date})">
-                        {{ post.content.slice(0, 30) }}
+            <div class="calendar-grid">
+                <div v-for="(day, i) in monthDays" :key="i" :class="['calendar-cell', { 'calendar-cell--outside': !day.isCurrentMonth, 'calendar-cell--today': isToday(day.date) }
+                ]">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div
+                            :class="['date', { 'date--today': isToday(day.date), 'date--outside': !day.isCurrentMonth }]">
+                            {{ day.date.getDate() }}
+                        </div>
+
+                        <button v-if="isFutureOrToday(day.date)" class="add-btn" @click.stop="openModal(day.date)"
+                            title="Schedule New Post">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
                     </div>
-                </transition-group>
+
+                    <transition-group name="fade" tag="div" class="event-list">
+                        <div v-for="post in getPostsForDate(day.date)" :key="post.id" :title="post.content"
+                            class="post-pill" @click.stop="openPostsModal({ post, date: day.date })">
+                            {{ post.message.slice(0, 30) }}
+                        </div>
+                    </transition-group>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 
 // Props
 const props = defineProps({
@@ -40,50 +43,13 @@ const props = defineProps({
     currentDate: Date
 });
 
+// onMounted(() => {
+//     console.log("MonthView mounted with posts:", props.posts);
+//     console.log("MonthView mounted with date:", props.currentDate);
+// });
+
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// const monthDays = computed(() => {
-//     const date = new Date(props.currentDate);
-
-//     const year = date.getFullYear();
-//     const month = date.getMonth();
-
-//     const firstDayIndex = new Date(year, month, 1).getDay();
-
-//     const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-//     const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-//     const days = [];
-
-//     // Previous month days
-//     for (let i = firstDayIndex - 1; i >= 0; i--) {
-//         days.push({
-//             date: new Date(year, month - 1, daysInPrevMonth - i),
-//             isCurrentMonth: false,
-//         });
-//     }
-
-//     // Current month days
-//     for (let i = 1; i <= daysInMonth; i++) {
-//         days.push({
-//             date: new Date(year, month, i),
-//             isCurrentMonth: true,
-//         });
-//     }
-
-//     // Fill remaining cells (42 total = 6 weeks)
-//     const remaining = 42 - days.length;
-
-//     for (let i = 1; i <= remaining; i++) {
-//         days.push({
-//             date: new Date(year, month + 1, i),
-//             isCurrentMonth: false,
-//         });
-//     }
-
-//     return days;
-// });
 
 // Methods
 const monthDays = computed(() => {
@@ -131,14 +97,29 @@ const isFutureOrToday = (date) => {
     return target >= today;
 };
 
+
 const getPostsForDate = (date) => {
     if (!date) return [];
 
-    const dayStr = date.toISOString().split("T")[0];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    return props.posts.filter(p => {
-        const d = (p.scheduled_at || p.created_at).split("T")[0];
-        return d === dayStr;
+    const cellDate = new Date(date);
+    cellDate.setHours(0, 0, 0, 0);
+
+    if (cellDate < today) {
+        return [];
+    }
+
+    const localDateString =
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+    return props.posts.filter(post => {
+        const postDate =
+            (post.scheduled_at || post.published_at)
+                .split(" ")[0];
+
+        return postDate === localDateString;
     });
 };
 
@@ -152,8 +133,8 @@ const openModal = (date) => {
     emit("open-modal", date);
 };
 
-const openPostsModal = ({post, date}) => {
-    emit("open-posts-modal", {post, date});
+const openPostsModal = ({ post, date }) => {
+    emit("open-posts-modal", { post, date });
 };
 
 // const openPostsModal = (date) => {
@@ -168,10 +149,17 @@ const openPostsModal = ({post, date}) => {
 @use "@sass/mixins.scss" as mixin;
 @use "@sass/variables.scss" as *;
 
+.calendar-scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
 .month-calendar {
     display: flex;
     flex-direction: column;
     gap: 14px;
+    min-width: 900px;
 }
 
 .add-btn {
@@ -183,9 +171,10 @@ const openPostsModal = ({post, date}) => {
     cursor: pointer;
     @include mixin.dynamic-text(700, 11px, #0f172a, center);
     margin-top: 2px;
-    transition: all 0.18s ease;opacity: 0;
-        visibility: hidden;
-        transform: translateY(4px);
+    transition: all 0.18s ease;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
 
     &:hover {
         background: $secondary;

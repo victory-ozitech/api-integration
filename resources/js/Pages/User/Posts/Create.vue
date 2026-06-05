@@ -6,198 +6,241 @@
             <p>Share something with your audience</p>
         </div>
 
-        <!-- Card -->
-        <div class="form-card">
-            <form @submit.prevent.stop="submitForm">
-
-                <!-- Channels Form Group -->
-                <div class="form-group">
-                    <div class="channel-selection-header">
-                        <div class="label">Select Channels</div>
-                        <div class="sub-label">Choose one or multiple channels to post to</div>
-                        <div class="selection-info">
-                            <span v-if="form.channels.length === 0" class="text-muted">No channels
-                                selected</span>
-                            <span v-else class="selected-count">
-                                {{ form.channels.length }} channel{{ form.channels.length > 1 ? 's' : ''
-                                }} selected
-                            </span>
-                            <button v-if="form.channels.length > 0" type="button" class="btn-clear"
-                                @click="clearSelection">
-                                Clear All
-                            </button>
-                        </div>
-                    </div>
-                    <div class="social-media-profile-cont">
-                        <div v-for="channel in channels" :key="channel.id" class="profile-img" :class="{
-                            grayscale: channel.status !== 'active',
-                            active: isChannelSelected(channel.id)
-                        }" @click="toggleChannel(channel)">
-                            <img :src="channel.avatar || '/assets/images/profile-img.png'"
-                                :alt="channel.channel_name" />
-                            <span class="social-icon">
-                                <i :class="getChannelIcon(channel.platform)"></i>
-                            </span>
-                            <div v-if="isChannelSelected(channel.id)" class="selected-badge">
-                                ✓
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Media Upload Form Group -->
-                <div class="form-group">
-                    <div class="label">Media</div>
-                    <div class="sub-label">Upload your photos or videos</div>
-
-                    <div class="upload-group">
-                        <!-- Hidden file inputs -->
-                        <input type="file" ref="photoInput" accept="image/*" multiple
-                            @change="handleMediaUpload($event, 'image')" style="display: none" />
-                        <input type="file" ref="videoInput" accept="video/*" multiple
-                            @change="handleMediaUpload($event, 'video')" style="display: none" />
-
-                        <!-- Trigger Buttons -->
-                        <button type="button" @click="$refs.photoInput.click()">
-                            <div class="img-cont">
-                                <img :src="'/assets/images/add-img.png'" alt="Add" />
-                            </div>
-                            Add Photos
-                        </button>
-                        <button type="button" @click="$refs.videoInput.click()">
-                            <div class="img-cont">
-                                <img :src="'/assets/images/upload-img.png'" alt="Upload" />
-                            </div>
-                            Add Videos
-                        </button>
-                        <button type="button">
-                            <div class="img-cont">
-                                <img :src="'/assets/images/library-img.png'" alt="Library" />
-                            </div>
-                            Use From Library
-                        </button>
-                    </div>
-
-                    <!-- Preview -->
-                    <div class="media-preview mt-3">
-                        <div v-for="(file, index) in previewMedia" :key="index" class="preview-item">
-                            <img v-if="file.type.startsWith('image/')" :src="file.url" class="preview-img" />
-                            <video v-else-if="file.type.startsWith('video/')" controls class="preview-video">
-                                <source :src="file.url" :type="file.type" />
-                            </video>
-                            <button type="button" class="btn btn-danger btn-sm mt-1" @click="removeMedia(index)">
-                                Remove
-                            </button>
-                        </div>
-                    </div>
-
-
-                    <!-- Media -->
-                    <div v-if="form.media?.length" class="media-section">
-                        <h5>Media</h5>
-                        <div class="media-grid">
-                            <div v-for="media in form.media" :key="media.url" class="media-item"
-                                @click.stop="openMedia(media.url)">
-                                <img v-if="isImage(media)" :src="getMediaUrl(media)"
-                                    :alt="media.original_name || media.name || 'Uploaded image'" />
-                                <div v-else-if="isVideo(media)" class="video-placeholder">
-                                    🎥 Video
+        <div class="row g-2">
+            <div class="col-lg-8">
+                <!-- Card -->
+                <div class="form-card">
+                    <form @submit.prevent.stop="submitForm">
+        
+                        <!-- Channels Form Group -->
+                        <div class="form-group">
+                            <div class="channel-selection-header">
+                                <div class="label">Select Channels</div>
+                                <div class="sub-label">Choose one or multiple channels to post to</div>
+                                <div class="selection-info">
+                                    <span v-if="form.channels.length === 0" class="text-muted">No channels
+                                        selected</span>
+                                    <span v-else class="selected-count">
+                                        {{ form.channels.length }} channel{{ form.channels.length > 1 ? 's' : ''
+                                        }} selected
+                                    </span>
+                                    <button v-if="form.channels.length > 0" type="button" class="btn-clear"
+                                        @click="clearSelection">
+                                        Clear All
+                                    </button>
                                 </div>
-                                <div class="media-info">
-                                    <div class="media-name">
-                                        {{ media.original_name }}
-                                    </div>
-                                    <div class="media-size">
-                                        {{ formatFileSize(media.size) }}
+                            </div>
+                            <div class="social-media-profile-cont">
+                                <div v-for="channel in channels" :key="channel.id" class="profile-img" :class="{
+                                    grayscale: channel.status !== 'active',
+                                    active: isChannelSelected(channel.id)
+                                }" @click="toggleChannel(channel)">
+                                    <img :src="channel.avatar || '/assets/images/profile-img.png'"
+                                        :alt="channel.channel_name" />
+                                    <span class="social-icon">
+                                        <i :class="getChannelIcon(channel.platform)"></i>
+                                    </span>
+                                    <div v-if="isChannelSelected(channel.id)" class="selected-badge">
+                                        ✓
                                     </div>
                                 </div>
-
-                                <!-- ✳️ Remove button -->
-                                <button type="button" class="remove-btn" @click.stop="deleteExistingMedia(media)">
-                                    ✕
+                            </div>
+                        </div>
+        
+                        <!-- Media Upload Form Group -->
+                        <div class="form-group">
+                            <div class="label">Media</div>
+                            <div class="sub-label">Upload your photos or videos</div>
+        
+                            <div class="upload-group">
+                                <!-- Hidden file inputs -->
+                                <input type="file" ref="photoInput" accept="image/*" multiple
+                                    @change="handleMediaUpload($event, 'image')" style="display: none" />
+                                <input type="file" ref="videoInput" accept="video/*" multiple
+                                    @change="handleMediaUpload($event, 'video')" style="display: none" />
+        
+                                <!-- Trigger Buttons -->
+                                <button type="button" @click="$refs.photoInput.click()">
+                                    <div class="img-cont">
+                                        <img :src="'/assets/images/add-img.png'" alt="Add" />
+                                    </div>
+                                    Add Photos
+                                </button>
+                                <button type="button" @click="$refs.videoInput.click()">
+                                    <div class="img-cont">
+                                        <img :src="'/assets/images/upload-img.png'" alt="Upload" />
+                                    </div>
+                                    Add Videos
+                                </button>
+                                <button type="button">
+                                    <div class="img-cont">
+                                        <img :src="'/assets/images/library-img.png'" alt="Library" />
+                                    </div>
+                                    Use From Library
                                 </button>
                             </div>
+        
+                            <!-- Preview -->
+                            <div class="media-preview mt-3">
+                                <div v-for="(file, index) in previewMedia" :key="index" class="preview-item">
+                                    <img v-if="file.type.startsWith('image/')" :src="file.url" class="preview-img" />
+                                    <video v-else-if="file.type.startsWith('video/')" controls class="preview-video">
+                                        <source :src="file.url" :type="file.type" />
+                                    </video>
+                                    <button type="button" class="btn btn-danger btn-sm mt-1" @click="removeMedia(index)">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+        
+        
+                            <!-- Media -->
+                            <div v-if="form.media?.length" class="media-section">
+                                <h5>Media</h5>
+                                <div class="media-grid">
+                                    <div v-for="media in form.media" :key="media.url" class="media-item"
+                                        @click.stop="openMedia(media.url)">
+                                        <img v-if="isImage(media)" :src="getMediaUrl(media)"
+                                            :alt="media.original_name || media.name || 'Uploaded image'" />
+                                        <div v-else-if="isVideo(media)" class="video-placeholder">
+                                            🎥 Video
+                                        </div>
+                                        <div class="media-info">
+                                            <div class="media-name">
+                                                {{ media.original_name }}
+                                            </div>
+                                            <div class="media-size">
+                                                {{ formatFileSize(media.size) }}
+                                            </div>
+                                        </div>
+        
+                                        <!-- ✳️ Remove button -->
+                                        <button type="button" class="remove-btn" @click.stop="deleteExistingMedia(media)">
+                                            ✕
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <!-- Content -->
+                        <div class="form-group">
+                            <label class="label" for="message">Post message</label>
+                            <textarea v-model="form.message" id="message" class="form-control"
+                                placeholder="Enter post message..." rows="3" />
+                        </div>
+        
+        
+                        <!-- Scheduling Options Form Group -->
+                        <div class="form-group">
+                            <div class="label m-0">
+                                Scheduling Options
+                            </div>
+        
+                            <div class="sub-label">
+                                Schedule your Post... <span class="text-danger">(Choose an option to
+                                    submit)</span>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="radio" id="publish_now" value="publish_now" class="form-check-input" v-model="selectedOption
+                                    " />
+                                <label class="form-check-label" for="publish_now">Publish
+                                    Now</label>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="radio" id="queue" value="queue" class="form-check-input"
+                                    v-model="selectedOption" />
+                                <label class="form-check-label" for="queue">Add to queue</label>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="radio" id="prioritize" value="prioritize" class="form-check-input"
+                                    v-model="selectedOption" />
+                                <label class="form-check-label" for="prioritize">Prioritize</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" id="custom_time" value="custom_time" class="form-check-input" v-model="selectedOption
+                                    " />
+                                <label class="form-check-label" for="custom_time">Custom
+                                    Time</label>
+                            </div>
+        
+                            <!-- custom date/time -->
+                            <div class="right-cont" v-if="
+                                selectedOption ===
+                                'custom_time'
+                            ">
+                                <!-- Date -->
+                                <div class="mb-3" v-if="selectedOption === 'custom_time'">
+                                    <label for="date" class="small-label">Date</label>
+                                    <input type="date" id="date" v-model="form.date" :min="minDate"
+                                        class="form-control small-input" />
+                                </div>
+        
+                                <!-- Time -->
+                                <div class="mb-3" v-if="selectedOption === 'custom_time'">
+                                    <label for="time" class="small-label">Time</label>
+                                    <input type="time" id="time" v-model="form.time" class="form-control small-input" />
+                                </div>
+        
+                            </div>
+                        </div>
+        
+                        <!-- Actions -->
+                        <div class="actions">
+                            <button class="btn btn-primary-custom" type="submit">
+                                Schedule Post
+                            </button>
+                        </div>
+                    </form>
+        
+                </div>
+            </div>
+            <div v-if="activePreviewChannel" class="col-lg-4">
+                <div class="right-col">
+                    <div class="preview-card">
+                        <component :is="getPreviewComponent(activePreviewChannel.platform)" :form="form"
+                            :channel="activePreviewChannel" :selected-channels="selectedPreviewChannels" />
+
+                        <!-- Channel Selection Info -->
+                        <div v-if="selectedPreviewChannels" class="channel-selection-info">
+                            <div class="info-card">
+                                <i class="fas fa-info-circle"></i>
+                                <div class="info-content">
+                                    <strong>Preview:</strong> Showing <strong>{{
+                                        activePreviewChannel.channel_name
+                                    }}</strong> preview
+                                    <div class="other-channels">
+                                        Also posting to:
+                                        <span v-for="(ch, index) in selectedPreviewChannels.slice(1)"
+                                            :key="ch.id || ch.channel_id" class="channel-tag">
+                                            {{ ch.channel_name || 'Unknown' }}
+                                            <span v-if="index < selectedPreviewChannels.slice(1).length - 1">,
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Content -->
-                <div class="form-group">
-                    <label class="label" for="message">Post message</label>
-                    <textarea v-model="form.message" id="message" class="form-control"
-                        placeholder="Enter post message..." rows="3" />
-                </div>
-
-
-                <!-- Scheduling Options Form Group -->
-                <div class="form-group">
-                    <div class="label m-0">
-                        Scheduling Options
-                    </div>
-
-                    <div class="sub-label">
-                        Schedule your Post... <span class="text-danger">(Choose an option to
-                            submit)</span>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="radio" id="publish_now" value="publish_now" class="form-check-input" v-model="selectedOption
-                            " />
-                        <label class="form-check-label" for="publish_now">Publish
-                            Now</label>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="radio" id="queue" value="queue" class="form-check-input"
-                            v-model="selectedOption" />
-                        <label class="form-check-label" for="queue">Add to queue</label>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="radio" id="prioritize" value="prioritize" class="form-check-input"
-                            v-model="selectedOption" />
-                        <label class="form-check-label" for="prioritize">Prioritize</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="radio" id="custom_time" value="custom_time" class="form-check-input" v-model="selectedOption
-                            " />
-                        <label class="form-check-label" for="custom_time">Custom
-                            Time</label>
-                    </div>
-
-                    <!-- custom date/time -->
-                    <div class="right-cont" v-if="
-                        selectedOption ===
-                        'custom_time'
-                    ">
-                        <!-- Date -->
-                        <div class="mb-3" v-if="selectedOption === 'custom_time'">
-                            <label for="date" class="small-label">Date</label>
-                            <input type="date" id="date" v-model="form.date" :min="minDate"
-                                class="form-control small-input" />
-                        </div>
-
-                        <!-- Time -->
-                        <div class="mb-3" v-if="selectedOption === 'custom_time'">
-                            <label for="time" class="small-label">Time</label>
-                            <input type="time" id="time" v-model="form.time" class="form-control small-input" />
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="actions">
-                    <button class="btn btn-primary-custom" type="submit">
-                        Schedule Post
-                    </button>
-                </div>
-            </form>
-
+            </div>
         </div>
     </PostFormLayout>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
+import { router } from "@inertiajs/vue3";
 import PostFormLayout from "@/Layouts/PostFormLayout.vue";
+
+import GooglePreview from '@/Components/Previews/GooglePreview.vue';
+import TwitterPreview from '@/Components/Previews/TwitterPreview.vue';
+import GenericPreview from '@/Components/Previews/GenericPreview.vue';
+import YouTubePreview from '@/Components/Previews/YouTubePreview.vue';
+import LinkedInPreview from '@/Components/Previews/LinkedInPreview.vue';
+import FacebookPreview from '@/Components/Previews/FacebookPreview.vue';
+import InstagramPreview from '@/Components/Previews/InstagramPreview.vue';
+import TikTokPreview from '@/Components/Previews/TikTokPreview.vue';
 
 
 //  ||============PROPS=================||
@@ -210,6 +253,8 @@ const props = defineProps({
 
 onMounted(() => {
     console.log("Available Channels:", props.channels);
+
+    resetForm();
 })
 
 
@@ -243,6 +288,33 @@ const form = reactive({
 const minDate = computed(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
+});
+
+// active preview channel (first selected channel or null)
+const activePreviewChannel = computed(() => {
+    if (!form.channels?.length) return null;
+
+    const firstId =
+        typeof form.channels[0] === 'object'
+            // ? form.channels[0].channel_id
+            ? form.channels[0].id
+            : form.channels[0];
+
+    return props.channels.find(c => c.id === firstId) || null;
+});
+
+// selected preview channels (all selected channels as objects)
+const selectedPreviewChannels = computed(() => {
+    if (!form.channels?.length) return null;
+
+    const selectedIds = form.channels.map(channel =>
+        typeof channel === 'object'
+            // ? channel.channel_id
+            ? channel.id
+            : channel
+    );
+
+    return props.channels.filter(c => selectedIds.includes(c.id));
 });
 
 
@@ -386,6 +458,79 @@ const clearSelection = () => {
 };
 
 
+
+// ======================================================
+// Preview Components
+// ======================================================
+
+const getPreviewComponent = (channelName) => {
+    // console.log('channel name passed: ', channelName);
+
+    const normalizedKey =
+        channelName
+            .toLowerCase()
+            .replace(/[-_]/g, '');
+
+    // console.log('channel name passed: ', normalizedKey);
+
+    switch (normalizedKey) {
+        case 'twitter':
+        case 'x':
+            return TwitterPreview;
+
+        case 'facebook':
+            return FacebookPreview;
+
+        case 'instagram':
+            return InstagramPreview;
+
+        case 'tiktok':
+            return TikTokPreview;
+
+        case 'linkedin':
+            return LinkedInPreview;
+
+        case 'youtube':
+            return YouTubePreview;
+
+        case 'google':
+        case 'googlebusiness':
+            return GooglePreview;
+
+        default:
+            return GenericPreview;
+    }
+};
+
+
+// ======================================================
+// Reset Helpers
+// ======================================================
+const getBlankForm = () => ({
+    message: '',
+    date: '',
+    time: '09:00',
+    channels: [],
+    media: [],
+    is_scheduled: false,
+    scheduled_at: null,
+    publish_option: 'now',
+    status: 'draft',
+    id: null,
+    group_id: null,
+    is_grouped: false,
+    posts: [],
+});
+
+const resetForm = () => {
+    Object.assign(form, getBlankForm());
+
+    selectedOption.value = 'publish_now';
+    previewMedia.value = [];
+    deleted_media.value = [];
+};
+
+
 const submitForm = () => {
     const selectedChannels = props.channels.filter((c) =>
         form.channels.some((sel) =>
@@ -399,7 +544,7 @@ const submitForm = () => {
         alert('Please select a channel first!');
         return;
     }
-
+    
     if (!selectedOption.value) {
         alert(
             'Please choose a scheduling option (Publish Now or Custom Time).'
@@ -483,13 +628,15 @@ const submitForm = () => {
     // return; // Remove this line to enable actual submission
 
     router.post(
-        route('facebook.publish'), // Adjust route name as needed
+        route('posts.store'), // Adjust route name as needed
         formData,
         {
             forceFormData: true,
 
             onSuccess: () => {
                 console.log('✅ Created');
+
+                resetForm();
             },
 
             onError: (errors) => {
