@@ -7,3 +7,4 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 Schedule::command('app:publish-scheduled-posts')->everyMinute();
+Schedule::command('app:sync-facebook-status')->everyMinute();

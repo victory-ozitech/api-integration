@@ -139,7 +139,7 @@ class FacebookAuthController extends Controller
         return back()->with('success', 'Page selected successfully.');
     }
 
-    public function disconnectPage(Channel $channel)
+    public function disconnectChannel(Channel $channel)
     {
         $channel->delete();
 

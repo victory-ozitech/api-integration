@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('channel_id')->constrained()->onDelete('cascade');
             $table->string('platform')->nullable();
             $table->string('facebook_post_id')->nullable();
-            $table->enum('status', ['pending', 'published', 'failed'])->default('pending');
+            $table->enum('status', ['pending', 'published', 'failed', 'deleted_on_platform'])->default('pending');
             $table->timestamps();
         });
     }

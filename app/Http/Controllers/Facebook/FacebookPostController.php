@@ -75,21 +75,21 @@ class FacebookPostController extends Controller
         ->first();
 
     if (!$postChannel || !$postChannel->facebook_post_id) {
-        return response()->json([
-            'error' => 'This post has not been published to Facebook yet.'
-        ], 404);
+        return back()->with('error', 'This post has not been published to Facebook yet.');
     }
 
-    $parts = explode('_', $postChannel->facebook_post_id);
+    $facebookPostId = $postChannel->facebook_post_id;
 
-    if (count($parts) < 2) {
-        return response()->json(['error' => 'Invalid Facebook post ID.'], 400);
+    if (str_contains($facebookPostId, '_')) {
+        $parts  = explode('_', $facebookPostId);
+        $pageId = $parts[0];
+        $postId = $parts[1];
+        $url    = "https://www.facebook.com/{$pageId}/posts/{$postId}";
+    } else {
+        $url = "https://www.facebook.com/photo/?fbid={$facebookPostId}";
     }
 
-    $pageId = $parts[0];
-    $postId = $parts[1];
-
-    return redirect()->away("https://www.facebook.com/{$pageId}/posts/{$postId}");
+    return redirect()->away($url);
 }
 
     public function update(Request $request, SchedulePost $post)

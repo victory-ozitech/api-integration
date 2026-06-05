@@ -30,7 +30,7 @@
                                 </div>
                             </div>
 
-                            <button class="btn btn-primary mt-4" @click="disconnect">
+                            <button class="btn btn-primary mt-4" @click="disconnect(page.id)">
                                 {{ loading ? 'Disconnecting...' : 'Disconnect Account' }}
                             </button>
                         </div>
@@ -100,10 +100,10 @@ onMounted(() => {
 const loading = ref(false)
 
 
-const disconnect = () => {
+const disconnect = (id) => {
     if (loading.value) return
 
-    router.post(route('facebook.disconnect-page'), {}, {
+    router.post(route('facebook.disconnect-page', { id }), {}, {
         onStart: () => loading.value = true,
         onFinish: () => loading.value = false,
     })
