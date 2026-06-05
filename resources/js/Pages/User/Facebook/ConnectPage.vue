@@ -103,7 +103,7 @@ const loading = ref(false)
 const disconnect = (id) => {
     if (loading.value) return
 
-    router.delete(route('facebook.disconnect-page'), id, {
+    router.delete(route('facebook.disconnect-page', id), {
         onStart: () => loading.value = true,
         onFinish: () => loading.value = false,
     })
