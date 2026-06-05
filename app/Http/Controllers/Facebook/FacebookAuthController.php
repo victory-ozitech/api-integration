@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Facebook;
 use App\Http\Controllers\Controller;
 use App\Models\Channel;
 use App\Models\FacebookAccount;
+use App\Models\PostChannel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
@@ -12,33 +13,27 @@ use Inertia\Inertia;
 class FacebookAuthController extends Controller
 {
     public function connect()
-    {
-        $facebookAccount = FacebookAccount::where('user_id', 1)->first();
+{
+    $facebookAccount = FacebookAccount::where('user_id', 1)->first();
 
-        if (!$facebookAccount) {
-            return Inertia::render('User/Facebook/ConnectPage', [
-                'facebookAccount' => null,
-                'pages'           => [],
-            ]);
-        }
-
-        $response = $this->facebookGet('me/accounts', [
-            'access_token' => $facebookAccount->access_token,
-            'fields'       => 'id,name,access_token,category,picture',
-        ]);
-
-        $pagesData = $response->json();
-
-        if (isset($pagesData['error'])) {
-            $facebookAccount->delete();
-            return redirect()->route('facebook.connect');
-        }
-
+    if (!$facebookAccount) {
         return Inertia::render('User/Facebook/ConnectPage', [
-            'facebookAccount' => $facebookAccount,
-            'pages'           => $pagesData['data'] ?? [],
+            'facebookAccount' => null,
+            'pages'           => [],
         ]);
     }
+
+    // Fetch pages from DB not from Facebook API
+    $channels = Channel::where('user_id', 1)
+        ->where('facebook_account_id', $facebookAccount->id)
+        ->get();
+        return $channels;
+
+    return Inertia::render('User/Facebook/ConnectPage', [
+        'facebookAccount' => $facebookAccount,
+        'pages'           => $channels,
+    ]);
+}
 
     public function redirectToFacebook()
     {
@@ -139,14 +134,23 @@ class FacebookAuthController extends Controller
         return back()->with('success', 'Page selected successfully.');
     }
 
-    public function disconnectChannel(Channel $channel)
+   public function disconnectChannel( $id)
     {
+        $channel = Channel::where('user_id', 1)
+        ->where('channel_id', $id) // channel_id is the Facebook page ID
+        ->first();
+        
+        if (!$channel) {
+            return back()->with('error', 'Channel not found.');
+        }
+            
+        // Delete associated post channels
+        PostChannel::where('channel_id', $channel->id)->delete();
+
+        // Delete the channel
         $channel->delete();
 
-        return back()->with(
-            'success',
-            'Page disconnected successfully.'
-        );
+        return back()->with('success', 'Page disconnected successfully.');
     }
 
     public function disconnectAccount()

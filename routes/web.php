@@ -23,8 +23,8 @@ Route::controller(FacebookAuthController::class)->group(function () {
     Route::get('/connect-facebook', 'connect')->name('facebook.connect');
     Route::get('/auth/facebook', 'redirectToFacebook')->name('facebook.redirect');
     Route::get('/auth/facebook/callback', 'handleCallback')->name('facebook.callback');
-    Route::post('/auth/facebook/select-page/{id}', 'selectedPage')->name('facebook.select-page');
-    Route::delete('/auth/facebook/disconnect-page/{channel}', 'disconnectChannel')->name('facebook.disconnect-page');
+    Route::post('/auth/facebook/select-page', 'selectedPage')->name('facebook.select-page');
+    Route::delete('/auth/facebook/disconnect-page/{id}', 'disconnectChannel')->name('facebook.disconnect-page');
 });
 
 // Posts
