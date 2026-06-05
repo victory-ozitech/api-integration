@@ -414,7 +414,7 @@ const formChannels = computed(() => {
     //     // .filter(c => selectedIds.includes(c.id))
     //     .map(c => c.channel));
 
-    return props.post.channels
+    return props.availableChannels
         .filter(c => selectedIds.includes(c.channel_id))
         // .filter(c => selectedIds.includes(c.id))
         .map(c => c.channel);
