@@ -65,36 +65,32 @@ class FacebookPostController extends Controller
         );
     }
 
-    public function viewOnFacebook(SchedulePost $post)
-    {
-        // Load the channels relationship
-        $post->load('channels');
+   public function viewOnFacebook(SchedulePost $post)
+{
+    $post->load('channels');
 
-        // Find the first published channel with a facebook_post_id
-        $postChannel = $post->channels
-            ->where('status', 'published')
-            ->whereNotNull('facebook_post_id')
-            ->first();
+    $postChannel = $post->channels
+        ->where('status', 'published')
+        ->whereNotNull('facebook_post_id')
+        ->first();
 
-        if (!$postChannel || !$postChannel->facebook_post_id) {
-            return back()->with('error', 'This post has not been published to Facebook yet.');
-        }
-
-        // Facebook post URL format is: 
-        // https://www.facebook.com/{page_id}/posts/{post_id}
-        // facebook_post_id is stored as "{page_id}_{post_id}"
-        $parts = explode('_', $postChannel->facebook_post_id);
-
-        if (count($parts) < 2) {
-            return back()->with('error', 'Invalid Facebook post ID.');
-        }
-
-        $pageId  = $parts[0];
-        $postId  = $parts[1];
-        $url     = "https://www.facebook.com/{$pageId}/posts/{$postId}";
-
-        return redirect($url);
+    if (!$postChannel || !$postChannel->facebook_post_id) {
+        return response()->json([
+            'error' => 'This post has not been published to Facebook yet.'
+        ], 404);
     }
+
+    $parts = explode('_', $postChannel->facebook_post_id);
+
+    if (count($parts) < 2) {
+        return response()->json(['error' => 'Invalid Facebook post ID.'], 400);
+    }
+
+    $pageId = $parts[0];
+    $postId = $parts[1];
+
+    return redirect()->away("https://www.facebook.com/{$pageId}/posts/{$postId}");
+}
 
     public function update(Request $request, SchedulePost $post)
     {

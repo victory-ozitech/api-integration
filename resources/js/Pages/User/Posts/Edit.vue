@@ -571,8 +571,9 @@ const submitForm = () => {
         form.date &&
         form.time
     ) {
+        const cleanTime = form.time.slice(0, 5); // always "HH:MM"
         form.is_scheduled = true;
-        form.scheduled_at = `${form.date} ${form.time}:00`;
+        form.scheduled_at = `${form.date} ${cleanTime}:00`;
         form.publish_option = 'schedule';
         form.status = 'scheduled';
     } else if (selectedOption.value === 'publish_now') {
