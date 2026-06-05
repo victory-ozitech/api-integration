@@ -31,6 +31,7 @@ Route::controller(FacebookAuthController::class)->group(function () {
 Route::controller(FacebookPostController::class)->group(function () {
     Route::get('/posts', 'index')->name('posts.index');
     Route::post('/posts', 'store')->name('posts.store');
+    Route::get('/posts/{post}', 'viewOnFacebook')->name('posts.show');
     Route::put('/posts/{post}', 'update')->name('posts.update');
     Route::delete('/posts/{post}', 'destroy')->name('posts.destroy');
 });
