@@ -30,7 +30,9 @@
                                 </div>
                             </div>
 
-                              <button class="btn btn-primary mt-4">Disconnect Account</button>
+                            <button class="btn btn-primary mt-4" @click="disconnect">
+                                {{ loading ? 'Disconnecting...' : 'Disconnect Account' }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -81,7 +83,7 @@
 
 <script setup>
 import UserLayout from "@/Layouts/UserLayout.vue";
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 
 // Props
 const props = defineProps({
@@ -93,6 +95,19 @@ onMounted(() => {
     console.log("Facebook Account:", props.facebookAccount);
     console.log("Pages:", props.pages);
 });
+
+
+const loading = ref(false)
+
+
+const disconnect = () => {
+    if (loading.value) return
+
+    router.post(route('facebook.disconnect-page'), {}, {
+        onStart: () => loading.value = true,
+        onFinish: () => loading.value = false,
+    })
+}
 </script>
 
 <style lang="scss" scoped>

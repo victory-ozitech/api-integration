@@ -591,6 +591,10 @@ const getMediaUrl = (media) => {
                 gap: 2px;
                 position: relative;
 
+                img{
+                    height: 100px;
+                }
+
                 >div {
                     overflow: hidden;
                     border-radius: 24px;
